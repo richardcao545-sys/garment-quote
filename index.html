@@ -1115,6 +1115,7 @@
             font-size: 12px;
         }
 
+        /* ========== 登录界面 ========== */
         .login-container {
             max-width: 420px;
             margin: 60px auto;
@@ -1242,7 +1243,7 @@
             <label>Supabase URL</label>
             <input type="text" id="supabaseUrl" value="https://cehktltjkiapgnlbctpe.supabase.com" />
             <label>Supabase Anon Key</label>
-            <input type="text" id="supabaseAnonKey" value="sb_publishable_cO2DGKtzmpb0cQKtCTdNSg_2ZGItChY" />
+            <input type="text" id="supabaseAnonKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s" />
             <div class="hint">💡 如需修改，请在此处更新</div>
         </div>
 
@@ -1637,10 +1638,11 @@
             'use strict';
 
             // ============================================================
-            // 1. 配置 Supabase（已预填）
+            // 1. 配置 Supabase（已预填正确的 anon key）
             // ============================================================
             const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.com';
-            const SUPABASE_ANON_KEY = 'sb_publishable_cO2DGKtzmpb0cQKtCTdNSg_2ZGItChY';
+            const SUPABASE_ANON_KEY =
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s';
 
             let supabase = null;
             let currentUser = null;
@@ -1668,7 +1670,7 @@
             const supabaseUrlInput = document.getElementById('supabaseUrl');
             const supabaseAnonKeyInput = document.getElementById('supabaseAnonKey');
 
-            // 预填配置（用户也可手动修改）
+            // 预填配置
             supabaseUrlInput.value = SUPABASE_URL;
             supabaseAnonKeyInput.value = SUPABASE_ANON_KEY;
 
@@ -1725,10 +1727,11 @@
                 try {
                     const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) throw error;
-                    registerSuccess.textContent = '注册成功！请查收邮箱确认链接，然后返回登录。';
+                    registerSuccess.textContent = '注册成功！请查收邮箱确认链接（如开启验证），然后返回登录。';
                     registerEmail.value = '';
                     registerPassword.value = '';
                 } catch (e) {
+                    console.error('注册错误:', e);
                     registerError.textContent = '注册失败: ' + e.message;
                 }
             }
