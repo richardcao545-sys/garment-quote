@@ -1238,10 +1238,10 @@
         <h2>MSA 服装报价系统</h2>
         <p class="subtitle">云协作版 · 实时同步</p>
 
-        <!-- Supabase 配置 -->
+        <!-- Supabase 配置（已预填） -->
         <div class="config-section">
             <label>Supabase URL</label>
-            <input type="text" id="supabaseUrl" value="https://cehktltjkiapgnlbctpe.supabase.com" />
+            <input type="text" id="supabaseUrl" value="https://cehktltjkiapgnlbctpe.supabase.co" />
             <label>Supabase Anon Key</label>
             <input type="text" id="supabaseAnonKey" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s" />
             <div class="hint">💡 如需修改，请在此处更新</div>
@@ -1638,7 +1638,7 @@
             'use strict';
 
             // ============================================================
-            // 1. 配置 Supabase（已预填正确的 anon key）
+            // 1. 配置 Supabase（已修正 .co 域名）
             // ============================================================
             const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.co';
             const SUPABASE_ANON_KEY =
@@ -1670,7 +1670,6 @@
             const supabaseUrlInput = document.getElementById('supabaseUrl');
             const supabaseAnonKeyInput = document.getElementById('supabaseAnonKey');
 
-            // 预填配置
             supabaseUrlInput.value = SUPABASE_URL;
             supabaseAnonKeyInput.value = SUPABASE_ANON_KEY;
 
@@ -2947,7 +2946,7 @@
             }
 
             // ============================================================
-            // 18. JSON 备份
+            // 18. JSON 备份（修复导入）
             // ============================================================
             function saveJsonBackup() {
                 const data = {
@@ -2966,14 +2965,20 @@
                 URL.revokeObjectURL(url);
             }
 
+            // ============================================================
+            // 核心修复：导入 JSON 备份（移除 ID，避免主键冲突）
+            // ============================================================
             function loadJsonBackup(file) {
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
                         if (!supabase) { alert('未连接到云数据库'); return; }
+
+                        // ----- 导入面料库 -----
                         if (data.fabricLibrary && data.fabricLibrary.length > 0) {
                             for (const item of data.fabricLibrary) {
+                                delete item.id; // 移除旧 ID，让数据库自动生成
                                 await supabase.from('fabrics').insert([{
                                     name: item.name,
                                     code: item.code || '',
@@ -2988,8 +2993,11 @@
                                 }]);
                             }
                         }
+
+                        // ----- 导入辅料库 -----
                         if (data.accessoryLibrary && data.accessoryLibrary.length > 0) {
                             for (const item of data.accessoryLibrary) {
+                                delete item.id;
                                 await supabase.from('accessories').insert([{
                                     name: item.name,
                                     code: item.code || '',
@@ -2998,8 +3006,11 @@
                                 }]);
                             }
                         }
+
+                        // ----- 导入款式列表 -----
                         if (data.quoteList && data.quoteList.length > 0) {
                             for (const q of data.quoteList) {
+                                delete q.id;
                                 await supabase.from('quotes').insert([{
                                     customer_code: q.customer_code || '',
                                     style_number: q.style_number || '',
@@ -3015,9 +3026,14 @@
                                 }]);
                             }
                         }
+
+                        // 重新加载所有数据并刷新界面
                         await loadAllData();
-                        alert('导入成功！数据已合并到云端。');
-                    } catch (err) { alert('导入失败: ' + err.message); }
+                        alert('✅ 导入成功！所有数据已合并到云端。');
+                    } catch (err) {
+                        alert('❌ 导入失败: ' + err.message);
+                        console.error('导入错误:', err);
+                    }
                 };
                 reader.readAsText(file);
             }
@@ -3210,6 +3226,7 @@
                 document.getElementById('loadJsonBtn').addEventListener('click', function() {
                     document.getElementById('fileInput').click();
                 });
+                // 绑定导入事件
                 document.getElementById('fileInput').addEventListener('change', function(e) {
                     if (this.files && this.files[0]) {
                         loadJsonBackup(this.files[0]);
@@ -3334,11 +3351,10 @@
                 updateAll();
             }
 
-            // 暴露部分函数给全局
             window.addFabric = addFabric;
             window.addAccessory = addAccessory;
 
-            // 修复 accessoryTbody 引用
+            // 修复 renderAccessories 的引用
             const accessoryTbody = document.getElementById('accessoryTableBody');
             const origRenderAcc = renderAccessories;
             renderAccessories = function() {
@@ -3424,7 +3440,6 @@
                 });
             };
 
-            // 覆盖原函数
             window.renderAccessories = renderAccessories;
 
             // 启动
