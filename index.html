@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>服装报价系统 - 按需导出款式</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
+    </script>
+    <style>
+        /* ---------- 全局重置 ---------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f6f8fc;
+            color: #1a2634;
+            padding: 30px 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 28px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
+            padding: 40px 44px 48px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+            border-bottom: 2px solid #eef2f7;
+            padding-bottom: 16px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.4px;
+            background: linear-gradient(145deg, #1a2634, #2c3e50);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .badge {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4a6a8b;
+            background: #eef4fa;
+            padding: 6px 16px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header .badge .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #2ecc71;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 36px;
+        }
+
+        @media (max-width: 820px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .container {
+                padding: 24px 18px;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #3d4f63;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group label .unit {
+            font-weight: 400;
+            color: #8a9aa8;
+            font-size: 12px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 14px;
+            border: 1.5px solid #dce3ec;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 450;
+            color: #1a2634;
+            background: #fafcff;
+            transition: border 0.2s, box-shadow 0.15s;
+            width: 100%;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #2a6b9e;
+            box-shadow: 0 0 0 4px rgba(42, 107, 158, 0.10);
+            background: #ffffff;
+        }
+
+        .form-group input::placeholder {
+            color: #b0c0ce;
+            font-weight: 400;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* ---------- 表格区域 ---------- */
+        .section-block {
+            grid-column: 1 / -1;
+            margin-top: 8px;
+            border-top: 2px dashed #e2e9f2;
+            padding-top: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1f2e3f;
+        }
+
+        .section-header .sub {
+            font-size: 13px;
+            color: #6f859b;
+            font-weight: 400;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s, box-shadow 0.15s;
+            background: #eef3f9;
+            color: #1f3a57;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background: #e2eaf4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        }
+        .btn-primary {
+            background: #1f3a57;
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: #142b42;
+            box-shadow: 0 6px 16px rgba(26, 55, 94, 0.18);
+        }
+        .btn-danger {
+            background: #fee9e7;
+            color: #b13e3a;
+        }
+        .btn-danger:hover {
+            background: #fcdad7;
+        }
+        .btn-success {
+            background: #e2f0e6;
+            color: #1d6b43;
+        }
+        .btn-success:hover {
+            background: #cde4d6;
+        }
+        .btn-sm {
+            padding: 5px 14px;
+            font-size: 13px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #dce3ec;
+            color: #2a4057;
+        }
+        .btn-outline:hover {
+            background: #f0f5fb;
+            border-color: #b0c0ce;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1.5px solid #e6edf6;
+            background: #fafcff;
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            min-width: 800px;
+        }
+        table th {
+            background: #f0f5fb;
+            color: #2a4057;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 14px 14px;
+            text-align: left;
+            border-bottom: 1.5px solid #dce3ec;
+        }
+        table td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e9eff6;
+            vertical-align: middle;
+        }
+        table tr:last-child td {
+            border-bottom: none;
+        }
+        table td input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1.5px solid #dce3ec;
+            border-radius: 10px;
+            font-size: 14px;
+            background: #ffffff;
+            transition: border 0.15s;
+            outline: none;
+        }
+        table td input:focus {
+            border-color: #2a6b9e;
+            box-shadow: 0 0 0 3px rgba(42, 107, 158, 0.08);
+        }
+        table td .btn {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .col-name {
+            min-width: 100px;
+        }
+        .col-width {
+            min-width: 70px;
+        }
+        .col-weight {
+            min-width: 70px;
+        }
+        .col-price {
+            min-width: 80px;
+        }
+        .col-usage {
+            min-width: 80px;
+        }
+        .col-loss {
+            min-width: 70px;
+        }
+        .col-actual {
+            min-width: 80px;
+            font-weight: 500;
+            color: #1a2c40;
+        }
+        .col-total {
+            min-width: 90px;
+            font-weight: 500;
+            color: #1a2c40;
+        }
+        .col-action {
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .empty-row td {
+            padding: 20px 14px;
+            text-align: center;
+            color: #8a9aa8;
+            font-style: italic;
+        }
+
+        /* ---------- 报价结果 ---------- */
+        .result-section {
+            grid-column: 1 / -1;
+            margin-top: 24px;
+            background: linear-gradient(145deg, #f2f8ff, #eef4fc);
+            border-radius: 20px;
+            padding: 28px 32px;
+            border: 1px solid #dce8f5;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px 30px;
+        }
+        .result-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .result-item .label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4f6b86;
+            letter-spacing: 0.2px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .result-item .value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #0a1e30;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+        .result-item .value.highlight {
+            color: #0f3b6b;
+            font-size: 30px;
+        }
+        .result-item .value .currency {
+            font-size: 16px;
+            font-weight: 500;
+            color: #5d7a97;
+            margin-right: 2px;
+        }
+
+        @media (max-width: 600px) {
+            .result-section {
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+                padding: 20px;
+            }
+            .result-item .value {
+                font-size: 20px;
+            }
+            .result-item .value.highlight {
+                font-size: 24px;
+            }
+        }
+
+        /* ---------- 款式管理 ---------- */
+        .quote-management {
+            grid-column: 1 / -1;
+            margin-top: 28px;
+            border-top: 2px solid #e2e9f2;
+            padding-top: 24px;
+        }
+        .quote-management .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .quote-management .header-row h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1f2e3f;
+        }
+        .quote-management .header-row .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .quote-list-table {
+            width: 100%;
+            font-size: 13px;
+            min-width: 650px;
+        }
+        .quote-list-table th {
+            background: #f0f5fb;
+            color: #2a4057;
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1.5px solid #dce3ec;
+        }
+        .quote-list-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e9eff6;
+            vertical-align: middle;
+        }
+        .quote-list-table .text-muted {
+            color: #8a9aa8;
+        }
+        .quote-list-table .col-actions {
+            text-align: center;
+            min-width: 100px;
+        }
+        .quote-list-table .col-checkbox {
+            width: 40px;
+            text-align: center;
+        }
+        .quote-list-table .col-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #1f3a57;
+        }
+
+        .export-info {
+            font-size: 13px;
+            color: #4a6a8b;
+            background: #eef4fa;
+            padding: 4px 14px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ---------- 底部操作 ---------- */
+        .actions {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .actions .btn {
+            padding: 10px 28px;
+            font-size: 15px;
+        }
+
+        .text-muted {
+            color: #6f859b;
+            font-size: 13px;
+        }
+
+        .storage-note {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 13px;
+            color: #6f859b;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: #f0f5fb;
+            border-radius: 20px;
+            display: inline-block;
+            width: auto;
+            justify-self: center;
+        }
+
+        @media print {
+            body {
+                background: #fff;
+                padding: 0.4in;
+            }
+            .container {
+                box-shadow: none;
+                padding: 20px 24px;
+            }
+            .btn,
+            .actions .btn {
+                display: none !important;
+            }
+            .table-wrap {
+                border-color: #ccc;
+            }
+            .result-section {
+                background: #f5f8fc;
+                border-color: #ccc;
+                break-inside: avoid;
+            }
+            .section-header .btn {
+                display: none !important;
+            }
+            .quote-management .header-row .actions .btn {
+                display: none !important;
+            }
+            .storage-note {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+
+        <div class="header">
+            <h1>🧥 服装报价系统</h1>
+            <span class="badge"><span class="dot"></span> 数据自动保存在浏览器</span>
+        </div>
+
+        <div class="grid-2">
+
+            <!-- 款式名称 & 数量 -->
+            <div class="form-group">
+                <label>款式名称</label>
+                <input type="text" id="styleName" placeholder="例：男士休闲衬衫" value="经典棉质衬衫" />
+            </div>
+            <div class="form-group">
+                <label>数量（件）</label>
+                <input type="text" id="quantity" placeholder="100" value="100" />
+            </div>
+
+            <!-- ===== 面料明细 ===== -->
+            <div class="section-block">
+                <div class="section-header">
+                    <div>
+                        <h3>🧶 面料明细</h3>
+                        <span class="sub">门幅(米) · 克重(g/m²) · 单价(元/kg) · 单件用料(米) · 损耗(%) → 自动计算实际用料与成本（门幅+0.05）</span>
+                    </div>
+                    <button class="btn btn-primary" id="addFabricBtn">＋ 添加面料</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-name">面料名称</th>
+                                <th class="col-width">门幅 (米)</th>
+                                <th class="col-weight">克重 (g/m²)</th>
+                                <th class="col-price">单价 (元/kg)</th>
+                                <th class="col-usage">单件用料 (米)</th>
+                                <th class="col-loss">损耗 (%)</th>
+                                <th class="col-actual">实际用料 (米)</th>
+                                <th class="col-total">单件成本 (元)</th>
+                                <th class="col-action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fabricTableBody">
+                            <!-- 动态渲染 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px;">
+                    面料总成本：<strong id="fabricTotalDisplay">¥0.00</strong>
+                </div>
+            </div>
+
+            <!-- ===== 辅料明细 ===== -->
+            <div class="section-block">
+                <div class="section-header">
+                    <div>
+                        <h3>🧵 辅料明细</h3>
+                        <span class="sub">纽扣、拉链、衬布、线等</span>
+                    </div>
+                    <button class="btn btn-primary" id="addAccessoryBtn">＋ 添加辅料</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="col-name">辅料名称</th>
+                                <th class="col-price">单价 (元)</th>
+                                <th class="col-qty">单件用量</th>
+                                <th class="col-total">小计 (元)</th>
+                                <th class="col-action">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accessoryTableBody">
+                            <!-- 动态渲染 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px;">
+                    辅料总成本：<strong id="accessoryTotalDisplay">¥0.00</strong>
+                </div>
+            </div>
+
+            <!-- ===== 工价 + 管理系数 并排 ===== -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>工价 <span class="unit">(元 / 件)</span></label>
+                    <input type="text" id="laborCost" placeholder="35.00" value="38.00" />
+                </div>
+                <div class="form-group">
+                    <label>管理系数</label>
+                    <input type="text" id="laborFactor" placeholder="1.30" value="1.30" />
+                </div>
+            </div>
+
+            <!-- 利润率、税率、汇率 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>利润率 <span class="unit">(%)</span></label>
+                    <input type="text" id="profitRate" placeholder="20" value="25" />
+                </div>
+                <div class="form-group">
+                    <label>税率 <span class="unit">(%)</span></label>
+                    <input type="text" id="taxRate" placeholder="13" value="13" />
+                </div>
+                <div class="form-group">
+                    <label>汇率 <span class="unit">(USD/CNY)</span></label>
+                    <input type="text" id="exchangeRate" placeholder="7.20" value="7.20" />
+                </div>
+            </div>
+
+            <!-- ===== 报价结果 ===== -->
+            <div class="result-section">
+                <div class="result-item">
+                    <span class="label">🧶 面料成本</span>
+                    <span class="value" id="fabricCostDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">🧵 辅料成本</span>
+                    <span class="value" id="accessoryCostDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">⚙️ 工价 (含管理)</span>
+                    <span class="value" id="laborDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">📊 总成本</span>
+                    <span class="value" id="totalCostDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">📈 利润</span>
+                    <span class="value" id="profitDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">💰 报价 (不含税)</span>
+                    <span class="value" id="priceExTaxDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">🧾 税额</span>
+                    <span class="value" id="taxDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">🏷️ 报价 (含税)</span>
+                    <span class="value highlight" id="priceIncTaxDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">📏 单件含税价</span>
+                    <span class="value" id="unitPriceDisplay">¥0.00</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">💵 美金含税价 (USD)</span>
+                    <span class="value" id="usdPriceDisplay">$0.00</span>
+                </div>
+            </div>
+
+            <!-- ===== 款式管理 ===== -->
+            <div class="quote-management">
+                <div class="header-row">
+                    <h3>📋 已保存款式列表 <span style="font-size:13px;font-weight:400;color:#6f859b;">（自动保存在浏览器中）</span></h3>
+                    <div class="actions">
+                        <button class="btn btn-success" id="saveQuoteBtn">💾 保存当前款式</button>
+                        <button class="btn btn-primary" id="exportSelectedBtn">📊 导出选中款式</button>
+                        <button class="btn btn-outline" id="clearQuotesBtn">🗑️ 清空列表</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="quote-list-table">
+                        <thead>
+                            <tr>
+                                <th class="col-checkbox">
+                                    <input type="checkbox" id="selectAllCheckbox" title="全选/取消全选" />
+                                </th>
+                                <th style="width:50px;">#</th>
+                                <th>款式名称</th>
+                                <th>数量</th>
+                                <th>总成本 (¥)</th>
+                                <th>含税报价 (¥)</th>
+                                <th>单件含税价 (¥)</th>
+                                <th>美金价 (USD)</th>
+                                <th style="width:120px;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quoteListBody">
+                            <tr class="empty-row">
+                                <td colspan="9">暂无保存的款式，请编辑好当前款式后点击"保存当前款式"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:8px;">
+                    <span class="export-info" id="selectedCountInfo">✅ 已选中 0 个款式</span>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button class="btn btn-sm btn-outline" id="selectAllBtn">全选</button>
+                        <button class="btn btn-sm btn-outline" id="deselectAllBtn">取消全选</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 存储状态提示 -->
+            <div style="grid-column:1/-1; display:flex; justify-content:center;">
+                <span class="storage-note">💾 数据自动保存在浏览器本地，关闭页面后重新打开依然存在</span>
+            </div>
+
+            <!-- 底部操作 -->
+            <div class="actions">
+                <button class="btn" id="resetBtn">↻ 重置示例</button>
+                <button class="btn" id="saveJsonBtn">💾 导出JSON备份</button>
+                <button class="btn" id="loadJsonBtn">📂 导入JSON备份</button>
+                <button class="btn btn-primary" id="printBtn">🖨️ 打印 / PDF</button>
+            </div>
+
+            <input type="file" id="fileInput" accept=".json" style="display:none" />
+
+        </div><!-- /grid-2 -->
+    </div><!-- /container -->
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ----- DOM refs -----
+            const styleName = document.getElementById('styleName');
+            const quantity = document.getElementById('quantity');
+            const laborCost = document.getElementById('laborCost');
+            const laborFactor = document.getElementById('laborFactor');
+            const profitRate = document.getElementById('profitRate');
+            const taxRate = document.getElementById('taxRate');
+            const exchangeRate = document.getElementById('exchangeRate');
+
+            const fabricTbody = document.getElementById('fabricTableBody');
+            const accessoryTbody = document.getElementById('accessoryTableBody');
+            const fabricTotalDisplay = document.getElementById('fabricTotalDisplay');
+            const accessoryTotalDisplay = document.getElementById('accessoryTotalDisplay');
+
+            const fabricCostDisplay = document.getElementById('fabricCostDisplay');
+            const accessoryCostDisplay = document.getElementById('accessoryCostDisplay');
+            const laborDisplay = document.getElementById('laborDisplay');
+            const totalCostDisplay = document.getElementById('totalCostDisplay');
+            const profitDisplay = document.getElementById('profitDisplay');
+            const priceExTaxDisplay = document.getElementById('priceExTaxDisplay');
+            const taxDisplay = document.getElementById('taxDisplay');
+            const priceIncTaxDisplay = document.getElementById('priceIncTaxDisplay');
+            const unitPriceDisplay = document.getElementById('unitPriceDisplay');
+            const usdPriceDisplay = document.getElementById('usdPriceDisplay');
+
+            const addFabricBtn = document.getElementById('addFabricBtn');
+            const addAccessoryBtn = document.getElementById('addAccessoryBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const printBtn = document.getElementById('printBtn');
+            const saveJsonBtn = document.getElementById('saveJsonBtn');
+            const loadJsonBtn = document.getElementById('loadJsonBtn');
+            const fileInput = document.getElementById('fileInput');
+
+            // 款式管理
+            const saveQuoteBtn = document.getElementById('saveQuoteBtn');
+            const exportSelectedBtn = document.getElementById('exportSelectedBtn');
+            const clearQuotesBtn = document.getElementById('clearQuotesBtn');
+            const quoteListBody = document.getElementById('quoteListBody');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const selectAllBtn = document.getElementById('selectAllBtn');
+            const deselectAllBtn = document.getElementById('deselectAllBtn');
+            const selectedCountInfo = document.getElementById('selectedCountInfo');
+
+            // ----- 数据 -----
+            let fabrics = [];
+            let accessories = [];
+            let quoteList = [];
+
+            // ----- localStorage 键名 -----
+            const STORAGE_KEY = 'garment_quote_data';
+
+            // ----- 辅助 -----
+            function fmt(v) {
+                return v.toFixed(2);
+            }
+
+            function parseInput(val) {
+                if (val === '' || val === null || val === undefined) return 0;
+                const n = parseFloat(val.replace(/,/g, ''));
+                return isNaN(n) ? 0 : n;
+            }
+
+            // ----- 计算单件面料成本与实际用料（门幅+0.05）-----
+            function calcFabric(fabric) {
+                const width = parseInput(fabric.width);
+                const weight = parseInput(fabric.weight);
+                const price = parseInput(fabric.pricePerKg);
+                const usage = parseInput(fabric.usage);
+                const lossPct = parseInput(fabric.lossPercent);
+                const effectiveWidth = width + 0.05;
+                const actualUsage = usage * (1 + lossPct / 100);
+                const cost = actualUsage * effectiveWidth * (weight / 1000) * price;
+                return { actualUsage, cost };
+            }
+
+            // ----- 计算款式的完整报价数据（基于给定参数）-----
+            function computeQuote(quote) {
+                const qty = parseInput(quote.quantity);
+                const labor = parseInput(quote.laborCost);
+                const factor = parseInput(quote.laborFactor);
+                const profitPct = parseInput(quote.profitRate) / 100;
+                const taxPct = parseInput(quote.taxRate) / 100;
+                const rate = parseInput(quote.exchangeRate);
+
+                let fabricUnitTotal = 0;
+                (quote.fabrics || []).forEach(f => {
+                    const { cost } = calcFabric(f);
+                    fabricUnitTotal += cost;
+                });
+                const fabricTotal = fabricUnitTotal * qty;
+
+                let accessoryUnitTotal = 0;
+                (quote.accessories || []).forEach(a => {
+                    accessoryUnitTotal += parseInput(a.price) * parseInput(a.qty);
+                });
+                const accessoryTotal = accessoryUnitTotal * qty;
+
+                const effectiveLabor = labor * factor;
+                const laborTotal = effectiveLabor * qty;
+
+                const totalCost = fabricTotal + accessoryTotal + laborTotal;
+                const profit = totalCost * profitPct;
+                const priceExTax = totalCost + profit;
+                const taxAmount = priceExTax * taxPct;
+                const priceIncTax = priceExTax + taxAmount;
+                const unitPrice = qty > 0 ? priceIncTax / qty : 0;
+                const usdPrice = rate > 0 ? priceIncTax / rate : 0;
+
+                return {
+                    fabricTotal,
+                    accessoryTotal,
+                    laborTotal,
+                    totalCost,
+                    profit,
+                    priceExTax,
+                    taxAmount,
+                    priceIncTax,
+                    unitPrice,
+                    usdPrice,
+                    fabricUnitTotal,
+                    accessoryUnitTotal,
+                    effectiveLabor
+                };
+            }
+
+            // ----- 更新面料表格中的计算列（不重新创建输入框）-----
+            function updateFabricRows() {
+                const rows = fabricTbody.querySelectorAll('tr');
+                rows.forEach((row, idx) => {
+                    if (idx >= fabrics.length) return;
+                    const f = fabrics[idx];
+                    const { actualUsage, cost } = calcFabric(f);
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 8) {
+                        cells[6].textContent = fmt(actualUsage);
+                        cells[7].textContent = '¥' + fmt(cost);
+                    }
+                });
+            }
+
+            // ----- 更新辅料表格中的小计列 -----
+            function updateAccessoryRows() {
+                const rows = accessoryTbody.querySelectorAll('tr');
+                rows.forEach((row, idx) => {
+                    if (idx >= accessories.length) return;
+                    const a = accessories[idx];
+                    const total = parseInput(a.price) * parseInput(a.qty);
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        cells[3].textContent = '¥' + fmt(total);
+                    }
+                });
+            }
+
+            // ----- 渲染面料表格（仅用于初始渲染和增删行）-----
+            function renderFabrics() {
+                if (fabrics.length === 0) {
+                    fabricTbody.innerHTML =
+                        `<tr class="empty-row"><td colspan="9">暂无面料，点击 "添加面料" 开始添加</td></tr>`;
+                    return;
+                }
+                let html = '';
+                fabrics.forEach((f, idx) => {
+                    const { actualUsage, cost } = calcFabric(f);
+                    html += `
+                        <tr data-index="${idx}">
+                            <td><input type="text" class="fabric-name" value="${escapeHtml(f.name)}" placeholder="面料名称" /></td>
+                            <td><input type="text" class="fabric-width" value="${f.width}" placeholder="1.5" /></td>
+                            <td><input type="text" class="fabric-weight" value="${f.weight}" placeholder="200" /></td>
+                            <td><input type="text" class="fabric-price" value="${f.pricePerKg}" placeholder="50" /></td>
+                            <td><input type="text" class="fabric-usage" value="${f.usage}" placeholder="1.2" /></td>
+                            <td><input type="text" class="fabric-loss" value="${f.lossPercent}" placeholder="5" /></td>
+                            <td class="col-actual">${fmt(actualUsage)}</td>
+                            <td class="col-total">¥${fmt(cost)}</td>
+                            <td class="text-center"><button class="btn btn-danger btn-sm remove-fabric" data-index="${idx}">✕</button></td>
+                        </tr>
+                    `;
+                });
+                fabricTbody.innerHTML = html;
+
+                // 绑定事件
+                fabricTbody.querySelectorAll('.fabric-name').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].name = this.value;
+                        updateAll();
+                    });
+                });
+                fabricTbody.querySelectorAll('.fabric-width').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].width = this.value;
+                        updateFabricRows();
+                        updateAll();
+                    });
+                });
+                fabricTbody.querySelectorAll('.fabric-weight').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].weight = this.value;
+                        updateFabricRows();
+                        updateAll();
+                    });
+                });
+                fabricTbody.querySelectorAll('.fabric-price').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].pricePerKg = this.value;
+                        updateFabricRows();
+                        updateAll();
+                    });
+                });
+                fabricTbody.querySelectorAll('.fabric-usage').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].usage = this.value;
+                        updateFabricRows();
+                        updateAll();
+                    });
+                });
+                fabricTbody.querySelectorAll('.fabric-loss').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        fabrics[idx].lossPercent = this.value;
+                        updateFabricRows();
+                        updateAll();
+                    });
+                });
+
+                fabricTbody.querySelectorAll('.remove-fabric').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index, 10);
+                        if (!isNaN(idx)) {
+                            fabrics.splice(idx, 1);
+                            renderFabrics();
+                            updateAll();
+                        }
+                    });
+                });
+            }
+
+            // ----- 渲染辅料表格 -----
+            function renderAccessories() {
+                if (accessories.length === 0) {
+                    accessoryTbody.innerHTML =
+                        `<tr class="empty-row"><td colspan="5">暂无辅料，点击 "添加辅料" 开始添加</td></tr>`;
+                    return;
+                }
+                let html = '';
+                accessories.forEach((a, idx) => {
+                    const total = parseInput(a.price) * parseInput(a.qty);
+                    html += `
+                        <tr data-index="${idx}">
+                            <td><input type="text" class="acc-name" value="${escapeHtml(a.name)}" placeholder="辅料名称" /></td>
+                            <td><input type="text" class="acc-price" value="${a.price}" placeholder="0.00" /></td>
+                            <td><input type="text" class="acc-qty" value="${a.qty}" placeholder="1" /></td>
+                            <td class="col-total">¥${fmt(total)}</td>
+                            <td class="text-center"><button class="btn btn-danger btn-sm remove-acc" data-index="${idx}">✕</button></td>
+                        </tr>
+                    `;
+                });
+                accessoryTbody.innerHTML = html;
+
+                accessoryTbody.querySelectorAll('.acc-name').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        accessories[idx].name = this.value;
+                        updateAll();
+                    });
+                });
+                accessoryTbody.querySelectorAll('.acc-price').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        accessories[idx].price = this.value;
+                        updateAccessoryRows();
+                        updateAll();
+                    });
+                });
+                accessoryTbody.querySelectorAll('.acc-qty').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() {
+                        accessories[idx].qty = this.value;
+                        updateAccessoryRows();
+                        updateAll();
+                    });
+                });
+
+                accessoryTbody.querySelectorAll('.remove-acc').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index, 10);
+                        if (!isNaN(idx)) {
+                            accessories.splice(idx, 1);
+                            renderAccessories();
+                            updateAll();
+                        }
+                    });
+                });
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ----- 添加 -----
+            function addFabric(name = '', width = '1.5', weight = '200', price = '50', usage = '1.2', lossPct = '5') {
+                fabrics.push({
+                    name: name || '面料',
+                    width: width,
+                    weight: weight,
+                    pricePerKg: price,
+                    usage: usage,
+                    lossPercent: lossPct
+                });
+                renderFabrics();
+                updateAll();
+            }
+
+            function addAccessory(name = '', price = '0', qty = '1') {
+                accessories.push({ name: name || '辅料', price: price, qty: qty });
+                renderAccessories();
+                updateAll();
+            }
+
+            // ----- 获取当前编辑区的报价数据对象（用于保存）-----
+            function getCurrentQuoteData() {
+                return {
+                    styleName: styleName.value,
+                    quantity: quantity.value,
+                    fabrics: JSON.parse(JSON.stringify(fabrics)),
+                    accessories: JSON.parse(JSON.stringify(accessories)),
+                    laborCost: laborCost.value,
+                    laborFactor: laborFactor.value,
+                    profitRate: profitRate.value,
+                    taxRate: taxRate.value,
+                    exchangeRate: exchangeRate.value,
+                };
+            }
+
+            // ----- 更新当前编辑区从指定数据 -----
+            function loadQuoteData(data) {
+                styleName.value = data.styleName || '';
+                quantity.value = data.quantity || '100';
+                fabrics = data.fabrics || [];
+                accessories = data.accessories || [];
+                laborCost.value = data.laborCost || '0';
+                laborFactor.value = data.laborFactor || '1.00';
+                profitRate.value = data.profitRate || '25';
+                taxRate.value = data.taxRate || '13';
+                exchangeRate.value = data.exchangeRate || '7.20';
+                renderFabrics();
+                renderAccessories();
+                updateAll();
+            }
+
+            // ----- 计算 & 更新所有显示 -----
+            function updateAll() {
+                // 更新表格内的计算列
+                updateFabricRows();
+                updateAccessoryRows();
+
+                // 构造当前报价对象用于计算
+                const quote = {
+                    quantity: quantity.value,
+                    laborCost: laborCost.value,
+                    laborFactor: laborFactor.value,
+                    profitRate: profitRate.value,
+                    taxRate: taxRate.value,
+                    exchangeRate: exchangeRate.value,
+                    fabrics: fabrics,
+                    accessories: accessories,
+                };
+                const result = computeQuote(quote);
+
+                // 更新汇总显示
+                fabricTotalDisplay.textContent = `¥${fmt(result.fabricTotal)}`;
+                accessoryTotalDisplay.textContent = `¥${fmt(result.accessoryTotal)}`;
+
+                fabricCostDisplay.textContent = `¥${fmt(result.fabricTotal)}`;
+                accessoryCostDisplay.textContent = `¥${fmt(result.accessoryTotal)}`;
+                laborDisplay.textContent = `¥${fmt(result.laborTotal)}`;
+                totalCostDisplay.textContent = `¥${fmt(result.totalCost)}`;
+                profitDisplay.textContent = `¥${fmt(result.profit)}`;
+                priceExTaxDisplay.textContent = `¥${fmt(result.priceExTax)}`;
+                taxDisplay.textContent = `¥${fmt(result.taxAmount)}`;
+                priceIncTaxDisplay.textContent = `¥${fmt(result.priceIncTax)}`;
+                unitPriceDisplay.textContent = `¥${fmt(result.unitPrice)}`;
+                usdPriceDisplay.textContent = `$${fmt(result.usdPrice)}`;
+            }
+
+            // ----- 获取选中的款式索引 -----
+            function getSelectedIndices() {
+                const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                const selected = [];
+                checkboxes.forEach((cb, idx) => {
+                    if (cb.checked) {
+                        selected.push(idx);
+                    }
+                });
+                return selected;
+            }
+
+            // ----- 更新选中数量显示 -----
+            function updateSelectedCount() {
+                const selected = getSelectedIndices();
+                const total = quoteList.length;
+                selectedCountInfo.textContent = `✅ 已选中 ${selected.length} / ${total} 个款式`;
+                // 更新全选checkbox状态
+                if (total > 0 && selected.length === total) {
+                    selectAllCheckbox.checked = true;
+                    selectAllCheckbox.indeterminate = false;
+                } else if (selected.length === 0) {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                } else {
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = true;
+                }
+            }
+
+            // ----- 款式列表渲染 -----
+            function renderQuoteList() {
+                if (quoteList.length === 0) {
+                    quoteListBody.innerHTML =
+                        `<tr class="empty-row"><td colspan="9">暂无保存的款式，请编辑好当前款式后点击"保存当前款式"</td></tr>`;
+                    selectAllCheckbox.checked = false;
+                    selectAllCheckbox.indeterminate = false;
+                    selectedCountInfo.textContent = '✅ 已选中 0 个款式';
+                    return;
+                }
+                let html = '';
+                quoteList.forEach((q, idx) => {
+                    const result = computeQuote(q);
+                    html += `
+                        <tr>
+                            <td class="text-center">
+                                <input type="checkbox" class="quote-checkbox" data-idx="${idx}" checked />
+                            </td>
+                            <td>${idx+1}</td>
+                            <td>${escapeHtml(q.styleName || '未命名')}</td>
+                            <td>${q.quantity}</td>
+                            <td>¥${fmt(result.totalCost)}</td>
+                            <td>¥${fmt(result.priceIncTax)}</td>
+                            <td>¥${fmt(result.unitPrice)}</td>
+                            <td>$${fmt(result.usdPrice)}</td>
+                            <td class="col-actions">
+                                <button class="btn btn-sm btn-outline load-quote" data-idx="${idx}">📂 加载</button>
+                                <button class="btn btn-sm btn-danger remove-quote" data-idx="${idx}">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                quoteListBody.innerHTML = html;
+
+                // 绑定加载和删除事件
+                quoteListBody.querySelectorAll('.load-quote').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx, 10);
+                        if (!isNaN(idx) && idx < quoteList.length) {
+                            loadQuoteData(quoteList[idx]);
+                            saveToLocalStorage();
+                        }
+                    });
+                });
+                quoteListBody.querySelectorAll('.remove-quote').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx, 10);
+                        if (!isNaN(idx) && idx < quoteList.length) {
+                            quoteList.splice(idx, 1);
+                            renderQuoteList();
+                            saveToLocalStorage();
+                        }
+                    });
+                });
+
+                // 绑定checkbox事件
+                quoteListBody.querySelectorAll('.quote-checkbox').forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        updateSelectedCount();
+                        // 保存选中状态到localStorage
+                        saveSelectedState();
+                    });
+                });
+
+                // 恢复选中状态
+                restoreSelectedState();
+                updateSelectedCount();
+            }
+
+            // ----- 保存/恢复选中状态 (存在localStorage) -----
+            const SELECTED_KEY = 'garment_quote_selected';
+
+            function saveSelectedState() {
+                try {
+                    const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                    const state = [];
+                    checkboxes.forEach(cb => {
+                        state.push(cb.checked);
+                    });
+                    localStorage.setItem(SELECTED_KEY, JSON.stringify(state));
+                } catch (e) { /* ignore */ }
+            }
+
+            function restoreSelectedState() {
+                try {
+                    const raw = localStorage.getItem(SELECTED_KEY);
+                    if (!raw) return;
+                    const state = JSON.parse(raw);
+                    const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                    checkboxes.forEach((cb, idx) => {
+                        if (idx < state.length) {
+                            cb.checked = state[idx];
+                        } else {
+                            cb.checked = true;
+                        }
+                    });
+                } catch (e) { /* ignore */ }
+            }
+
+            // ========== localStorage 存储 ==========
+            function saveToLocalStorage() {
+                try {
+                    const data = {
+                        quoteList: quoteList,
+                        current: {
+                            styleName: styleName.value,
+                            quantity: quantity.value,
+                            fabrics: fabrics,
+                            accessories: accessories,
+                            laborCost: laborCost.value,
+                            laborFactor: laborFactor.value,
+                            profitRate: profitRate.value,
+                            taxRate: taxRate.value,
+                            exchangeRate: exchangeRate.value,
+                        }
+                    };
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                } catch (e) {
+                    console.warn('保存到localStorage失败:', e);
+                }
+            }
+
+            function loadFromLocalStorage() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return false;
+                    const data = JSON.parse(raw);
+                    if (data.quoteList) {
+                        quoteList = data.quoteList;
+                    }
+                    if (data.current) {
+                        const cur = data.current;
+                        styleName.value = cur.styleName || '';
+                        quantity.value = cur.quantity || '100';
+                        fabrics = cur.fabrics || [];
+                        accessories = cur.accessories || [];
+                        laborCost.value = cur.laborCost || '0';
+                        laborFactor.value = cur.laborFactor || '1.00';
+                        profitRate.value = cur.profitRate || '25';
+                        taxRate.value = cur.taxRate || '13';
+                        exchangeRate.value = cur.exchangeRate || '7.20';
+                        renderFabrics();
+                        renderAccessories();
+                        updateAll();
+                    }
+                    renderQuoteList();
+                    return true;
+                } catch (e) {
+                    console.warn('加载localStorage失败:', e);
+                    return false;
+                }
+            }
+
+            // 每次修改quoteList后自动保存
+            function saveQuoteAndSync() {
+                saveToLocalStorage();
+                renderQuoteList();
+            }
+
+            // ----- 保存当前款式到列表 -----
+            function saveCurrentQuote() {
+                const data = getCurrentQuoteData();
+                if (!data.styleName.trim()) {
+                    alert('请填写款式名称');
+                    return;
+                }
+                data.id = Date.now();
+                quoteList.push(data);
+                saveQuoteAndSync();
+                // 新保存的款式默认选中
+                const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                if (checkboxes.length > 0) {
+                    checkboxes[checkboxes.length - 1].checked = true;
+                    saveSelectedState();
+                    updateSelectedCount();
+                }
+                alert(`款式 "${data.styleName}" 已保存到列表。`);
+            }
+
+            // ----- 导出选中的款式为 Excel -----
+            function exportSelectedQuotes() {
+                const selectedIndices = getSelectedIndices();
+                if (selectedIndices.length === 0) {
+                    alert('请至少选择一个款式进行导出。');
+                    return;
+                }
+
+                const selectedQuotes = selectedIndices.map(idx => quoteList[idx]);
+
+                const wb = XLSX.utils.book_new();
+
+                // 1. 汇总sheet
+                const summaryRows = [
+                    ['多款式报价汇总表（选中款式）'],
+                    ['生成日期', new Date().toLocaleString()],
+                    [],
+                    ['序号', '款式名称', '数量', '总成本(¥)', '含税报价(¥)', '单件含税价(¥)', '美金价(USD)']
+                ];
+                selectedQuotes.forEach((q, idx) => {
+                    const result = computeQuote(q);
+                    summaryRows.push([
+                        idx + 1,
+                        q.styleName,
+                        q.quantity,
+                        result.totalCost,
+                        result.priceIncTax,
+                        result.unitPrice,
+                        result.usdPrice
+                    ]);
+                });
+                const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
+                wsSummary['!cols'] = [{ wch: 8 }, { wch: 20 }, { wch: 12 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
+                XLSX.utils.book_append_sheet(wb, wsSummary, '汇总对比');
+
+                // 2. 每个选中的款式一个sheet
+                selectedQuotes.forEach((q, idx) => {
+                    const sheetName = (q.styleName || '款式' + (idx + 1)).slice(0, 31);
+                    const result = computeQuote(q);
+
+                    const infoRows = [
+                        ['款式报价明细'],
+                        ['款式名称', q.styleName],
+                        ['数量', q.quantity],
+                        ['工价（元/件）', q.laborCost],
+                        ['管理系数', q.laborFactor],
+                        ['有效工价（元/件）', result.effectiveLabor],
+                        ['利润率（%）', q.profitRate],
+                        ['税率（%）', q.taxRate],
+                        ['汇率（USD/CNY）', q.exchangeRate],
+                        [],
+                        ['成本项', '金额（元）'],
+                        ['面料总成本', result.fabricTotal],
+                        ['辅料总成本', result.accessoryTotal],
+                        ['工价合计', result.laborTotal],
+                        ['总成本', result.totalCost],
+                        ['利润', result.profit],
+                        ['报价（不含税）', result.priceExTax],
+                        ['税额', result.taxAmount],
+                        ['报价（含税）', result.priceIncTax],
+                        ['单件含税价', result.unitPrice],
+                        ['美金含税价（USD）', result.usdPrice],
+                    ];
+
+                    const fabricRows = [
+                        ['面料明细'],
+                        ['面料名称', '门幅(米)', '克重(g/m²)', '单价(元/kg)', '单件用料(米)', '损耗(%)', '实际用料(米)', '单件成本(元)']
+                    ];
+                    (q.fabrics || []).forEach(f => {
+                        const { actualUsage, cost } = calcFabric(f);
+                        fabricRows.push([f.name, f.width, f.weight, f.pricePerKg, f.usage, f.lossPercent, actualUsage,
+                            cost
+                        ]);
+                    });
+                    fabricRows.push(['合计', '', '', '', '', '', '', result.fabricUnitTotal]);
+
+                    const accRows = [
+                        ['辅料明细'],
+                        ['辅料名称', '单价(元)', '单件用量', '单件小计(元)']
+                    ];
+                    let accSum = 0;
+                    (q.accessories || []).forEach(a => {
+                        const total = parseInput(a.price) * parseInput(a.qty);
+                        accSum += total;
+                        accRows.push([a.name, a.price, a.qty, total]);
+                    });
+                    accRows.push(['合计', '', '', accSum]);
+
+                    const allRows = [
+                        ...infoRows,
+                        [],
+                        ...fabricRows,
+                        [],
+                        ...accRows
+                    ];
+                    const ws = XLSX.utils.aoa_to_sheet(allRows);
+                    ws['!cols'] = [
+                        { wch: 20 },
+                        { wch: 14 },
+                        { wch: 14 },
+                        { wch: 14 },
+                        { wch: 14 },
+                        { wch: 12 },
+                        { wch: 14 },
+                        { wch: 14 }
+                    ];
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                });
+
+                const filename = `多款式报价_选中_${new Date().toISOString().slice(0,10)}.xlsx`;
+                XLSX.writeFile(wb, filename);
+            }
+
+            // ----- 全选/取消全选 -----
+            function selectAll() {
+                const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                checkboxes.forEach(cb => { cb.checked = true; });
+                saveSelectedState();
+                updateSelectedCount();
+            }
+
+            function deselectAll() {
+                const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
+                checkboxes.forEach(cb => { cb.checked = false; });
+                saveSelectedState();
+                updateSelectedCount();
+            }
+
+            // ----- 清空列表 -----
+            function clearQuoteList() {
+                if (quoteList.length === 0) return;
+                if (confirm('确定要清空所有已保存的款式吗？')) {
+                    quoteList = [];
+                    saveQuoteAndSync();
+                    localStorage.removeItem(SELECTED_KEY);
+                }
+            }
+
+            // ----- 重置示例（只重置当前编辑区，不清除列表）-----
+            function resetToExample() {
+                styleName.value = '经典棉质衬衫';
+                quantity.value = '100';
+                laborCost.value = '38.00';
+                laborFactor.value = '1.30';
+                profitRate.value = '25';
+                taxRate.value = '13';
+                exchangeRate.value = '7.20';
+
+                fabrics = [
+                    { name: '棉布', width: '1.5', weight: '200', pricePerKg: '50', usage: '1.2', lossPercent: '5' },
+                    { name: '里布', width: '1.4', weight: '120', pricePerKg: '35', usage: '0.8', lossPercent: '3' },
+                    { name: '衬布', width: '1.2', weight: '80', pricePerKg: '28', usage: '0.5', lossPercent: '2' },
+                ];
+                accessories = [
+                    { name: '树脂纽扣', price: '1.20', qty: '7' },
+                    { name: '涤纶缝纫线', price: '0.80', qty: '3' },
+                    { name: '吊牌+洗标', price: '0.90', qty: '1' },
+                ];
+                renderFabrics();
+                renderAccessories();
+                updateAll();
+                saveToLocalStorage();
+            }
+
+            // ----- 导出JSON备份（包含列表和当前编辑区）-----
+            function saveConfig() {
+                const data = {
+                    quoteList: quoteList,
+                    current: {
+                        styleName: styleName.value,
+                        quantity: quantity.value,
+                        laborCost: laborCost.value,
+                        laborFactor: laborFactor.value,
+                        profitRate: profitRate.value,
+                        taxRate: taxRate.value,
+                        exchangeRate: exchangeRate.value,
+                        fabrics: fabrics,
+                        accessories: accessories,
+                    }
+                };
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `报价备份_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            // ----- 导入JSON备份 -----
+            function loadConfig(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.quoteList) {
+                            quoteList = data.quoteList;
+                        }
+                        if (data.current) {
+                            const cur = data.current;
+                            styleName.value = cur.styleName || '';
+                            quantity.value = cur.quantity || '100';
+                            fabrics = cur.fabrics || [];
+                            accessories = cur.accessories || [];
+                            laborCost.value = cur.laborCost || '0';
+                            laborFactor.value = cur.laborFactor || '1.00';
+                            profitRate.value = cur.profitRate || '25';
+                            taxRate.value = cur.taxRate || '13';
+                            exchangeRate.value = cur.exchangeRate || '7.20';
+                            renderFabrics();
+                            renderAccessories();
+                            updateAll();
+                        }
+                        renderQuoteList();
+                        saveToLocalStorage();
+                        alert('导入成功！');
+                    } catch (err) {
+                        alert('导入失败，请检查JSON格式。');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // ----- 绑定事件 -----
+            function bindInputs() {
+                const inputs = [quantity, laborCost, laborFactor, profitRate, taxRate, exchangeRate];
+                inputs.forEach(inp => {
+                    inp.addEventListener('input', function() {
+                        updateAll();
+                        saveToLocalStorage();
+                    });
+                    inp.addEventListener('change', function() {
+                        updateAll();
+                        saveToLocalStorage();
+                    });
+                });
+                styleName.addEventListener('input', function() {
+                    updateAll();
+                    saveToLocalStorage();
+                });
+            }
+
+            function handlePrint() { window.print(); }
+
+            // ----- 初始化 -----
+            function init() {
+                // 先尝试从localStorage加载
+                const hasStorage = loadFromLocalStorage();
+                if (!hasStorage) {
+                    resetToExample();
+                }
+                saveToLocalStorage();
+
+                bindInputs();
+
+                addFabricBtn.addEventListener('click', function() {
+                    addFabric('新面料', '1.5', '200', '50', '1.2', '5');
+                    saveToLocalStorage();
+                });
+                addAccessoryBtn.addEventListener('click', function() {
+                    addAccessory('新辅料', '0.5', '1');
+                    saveToLocalStorage();
+                });
+
+                resetBtn.addEventListener('click', function() {
+                    resetToExample();
+                    saveToLocalStorage();
+                });
+                printBtn.addEventListener('click', handlePrint);
+
+                saveJsonBtn.addEventListener('click', saveConfig);
+                loadJsonBtn.addEventListener('click', function() {
+                    fileInput.click();
+                });
+                fileInput.addEventListener('change', function(e) {
+                    if (this.files && this.files[0]) {
+                        loadConfig(this.files[0]);
+                        this.value = '';
+                    }
+                });
+
+                // 款式管理事件
+                saveQuoteBtn.addEventListener('click', saveCurrentQuote);
+                exportSelectedBtn.addEventListener('click', exportSelectedQuotes);
+                clearQuotesBtn.addEventListener('click', clearQuoteList);
+
+                // 全选/取消全选
+                selectAllCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectAll();
+                    } else {
+                        deselectAll();
+                    }
+                });
+                selectAllBtn.addEventListener('click', selectAll);
+                deselectAllBtn.addEventListener('click', deselectAll);
+
+                // 在删除面料/辅料后保存
+                document.querySelector('#fabricTableBody').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-fabric')) {
+                        setTimeout(saveToLocalStorage, 0);
+                    }
+                });
+                document.querySelector('#accessoryTableBody').addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-acc')) {
+                        setTimeout(saveToLocalStorage, 0);
+                    }
+                });
+
+                // 页面关闭前保存
+                window.addEventListener('beforeunload', function() {
+                    saveSelectedState();
+                    saveToLocalStorage();
+                });
+
+                updateAll();
+                renderQuoteList();
+                updateSelectedCount();
+            }
+
+            init();
+
+        })();
+    </script>
+
+</body>
+</html>
