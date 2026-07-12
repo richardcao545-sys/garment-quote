@@ -7,6 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
     </script>
     <style>
+        /* ========== 全局 ========== */
         * {
             margin: 0;
             padding: 0;
@@ -14,9 +15,9 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f6f8fc;
-            color: #1a2634;
+            font-family: 'Calibri', 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #edf0f5;
+            color: #1a1a2e;
             padding: 30px 20px;
             min-height: 100vh;
             display: flex;
@@ -25,32 +26,55 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
             width: 100%;
             background: #ffffff;
-            border-radius: 28px;
-            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
-            padding: 40px 44px 48px;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(26, 42, 74, 0.10), 0 8px 24px rgba(26, 42, 74, 0.05);
+            padding: 36px 44px 44px;
+            transition: all 0.2s;
         }
 
+        /* ========== 头部 ========== */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             margin-bottom: 28px;
-            border-bottom: 2px solid #eef2f7;
-            padding-bottom: 16px;
+            padding-bottom: 18px;
+            border-bottom: 2px solid #eef1f7;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #c9a84c, #e8d5a3);
+            border-radius: 4px;
         }
 
         .header h1 {
             font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #1a2a4a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 span {
+            background: linear-gradient(135deg, #c9a84c, #b8923a);
+            font-size: 14px;
             font-weight: 600;
-            letter-spacing: -0.4px;
-            background: linear-gradient(145deg, #1a2634, #2c3e50);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #fff;
+            padding: 2px 14px;
+            border-radius: 40px;
+            letter-spacing: 0.5px;
         }
 
         .header .badge {
@@ -58,11 +82,12 @@
             font-weight: 500;
             color: #4a6a8b;
             background: #eef4fa;
-            padding: 6px 16px;
+            padding: 6px 18px;
             border-radius: 40px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            border: 1px solid #dce6f0;
         }
         .header .badge .dot {
             display: inline-block;
@@ -70,13 +95,25 @@
             height: 8px;
             background: #2ecc71;
             border-radius: 50%;
-            margin-right: 4px;
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(0.85);
+            }
         }
 
+        /* ========== 网格 ========== */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 24px 36px;
+            gap: 22px 32px;
         }
 
         @media (max-width: 820px) {
@@ -85,10 +122,14 @@
                 gap: 16px;
             }
             .container {
-                padding: 24px 18px;
+                padding: 20px 16px;
+            }
+            .header h1 {
+                font-size: 20px;
             }
         }
 
+        /* ========== 表单 ========== */
         .form-group {
             display: flex;
             flex-direction: column;
@@ -97,9 +138,9 @@
 
         .form-group label {
             font-size: 13px;
-            font-weight: 500;
-            color: #3d4f63;
-            letter-spacing: 0.3px;
+            font-weight: 600;
+            color: #2c3f5a;
+            letter-spacing: 0.2px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -117,24 +158,25 @@
             border: 1.5px solid #dce3ec;
             border-radius: 12px;
             font-size: 15px;
-            font-weight: 450;
-            color: #1a2634;
+            font-weight: 400;
+            color: #1a1a2e;
             background: #fafcff;
-            transition: border 0.2s, box-shadow 0.15s;
+            transition: border 0.25s, box-shadow 0.25s, background 0.2s;
             width: 100%;
             outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
         }
 
         .form-group input:focus,
         .form-group select:focus {
-            border-color: #2a6b9e;
-            box-shadow: 0 0 0 4px rgba(42, 107, 158, 0.10);
+            border-color: #2c5f8a;
+            box-shadow: 0 0 0 4px rgba(44, 95, 138, 0.10);
             background: #ffffff;
         }
 
         .form-group input::placeholder {
-            color: #b0c0ce;
-            font-weight: 400;
+            color: #b5c4d2;
+            font-weight: 300;
         }
 
         .form-row {
@@ -147,10 +189,10 @@
             min-width: 120px;
         }
 
-        /* ---------- 表格区域 ---------- */
+        /* ========== 区块标题 ========== */
         .section-block {
             grid-column: 1 / -1;
-            margin-top: 8px;
+            margin-top: 6px;
             border-top: 2px dashed #e2e9f2;
             padding-top: 20px;
         }
@@ -166,8 +208,15 @@
 
         .section-header h3 {
             font-size: 17px;
-            font-weight: 600;
-            color: #1f2e3f;
+            font-weight: 700;
+            color: #1a2a4a;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header h3 .icon {
+            font-size: 20px;
         }
 
         .section-header .sub {
@@ -176,74 +225,104 @@
             font-weight: 400;
         }
 
+        /* ========== 按钮 ========== */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            padding: 8px 20px;
+            padding: 8px 22px;
             border: none;
             border-radius: 40px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s, transform 0.1s, box-shadow 0.15s;
+            transition: all 0.2s ease;
             background: #eef3f9;
             color: #1f3a57;
             text-decoration: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
         }
-        .btn:hover {
-            background: #e2eaf4;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0);
+            transition: background 0.3s;
         }
-        .btn-primary {
-            background: #1f3a57;
-            color: #fff;
+        .btn:hover::after {
+            background: rgba(255, 255, 255, 0.15);
         }
-        .btn-primary:hover {
-            background: #142b42;
-            box-shadow: 0 6px 16px rgba(26, 55, 94, 0.18);
-        }
-        .btn-danger {
-            background: #fee9e7;
-            color: #b13e3a;
-        }
-        .btn-danger:hover {
-            background: #fcdad7;
-        }
-        .btn-success {
-            background: #e2f0e6;
-            color: #1d6b43;
-        }
-        .btn-success:hover {
-            background: #cde4d6;
-        }
-        .btn-sm {
-            padding: 5px 14px;
-            font-size: 13px;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid #dce3ec;
-            color: #2a4057;
-        }
-        .btn-outline:hover {
-            background: #f0f5fb;
-            border-color: #b0c0ce;
-        }
-        .btn-info {
-            background: #e2edf7;
-            color: #1f4a7a;
-        }
-        .btn-info:hover {
-            background: #cfe0ef;
+        .btn:active {
+            transform: scale(0.96);
         }
 
+        .btn-primary {
+            background: linear-gradient(135deg, #1a2a4a, #2c5f8a);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(26, 42, 74, 0.20);
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 20px rgba(26, 42, 74, 0.30);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #1e7e34, #27ae60);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(30, 126, 52, 0.20);
+        }
+        .btn-success:hover {
+            box-shadow: 0 6px 20px rgba(30, 126, 52, 0.30);
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.18);
+        }
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px rgba(192, 57, 43, 0.28);
+            transform: translateY(-1px);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #1a5276, #2e86c1);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(26, 82, 118, 0.18);
+        }
+        .btn-info:hover {
+            box-shadow: 0 6px 20px rgba(26, 82, 118, 0.28);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid #d0d8e4;
+            color: #2c3f5a;
+        }
+        .btn-outline:hover {
+            background: #f0f4fa;
+            border-color: #a0b4cc;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 5px 14px;
+            font-size: 12px;
+            border-radius: 30px;
+        }
+
+        /* ========== 表格 ========== */
         .table-wrap {
             overflow-x: auto;
             border-radius: 16px;
-            border: 1.5px solid #e6edf6;
+            border: 1px solid #e6edf6;
             background: #fafcff;
             margin-bottom: 8px;
         }
@@ -256,10 +335,10 @@
         }
         table th {
             background: #f0f5fb;
-            color: #2a4057;
-            font-weight: 600;
+            color: #1a2a4a;
+            font-weight: 700;
             font-size: 12px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             text-transform: uppercase;
             padding: 14px 14px;
             text-align: left;
@@ -267,27 +346,33 @@
         }
         table td {
             padding: 10px 14px;
-            border-bottom: 1px solid #e9eff6;
+            border-bottom: 1px solid #eef2f8;
             vertical-align: middle;
+            background: #ffffff;
+            transition: background 0.15s;
         }
         table tr:last-child td {
             border-bottom: none;
         }
+        table tr:hover td {
+            background: #f6f9fe;
+        }
         table td input,
         table td select {
             width: 100%;
-            padding: 8px 10px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 10px;
+            padding: 7px 10px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 14px;
             background: #ffffff;
-            transition: border 0.15s;
+            transition: border 0.2s, box-shadow 0.2s;
             outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
         }
         table td input:focus,
         table td select:focus {
-            border-color: #2a6b9e;
-            box-shadow: 0 0 0 3px rgba(42, 107, 158, 0.08);
+            border-color: #2c5f8a;
+            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.08);
         }
         table td select {
             appearance: auto;
@@ -295,15 +380,16 @@
         }
         table td input:disabled,
         table td select:disabled {
-            background: #f0f2f5;
+            background: #f2f5f9;
             color: #7a8a9a;
             cursor: not-allowed;
             opacity: 0.7;
         }
         table td .btn {
-            padding: 5px 12px;
+            padding: 4px 12px;
             font-size: 12px;
         }
+
         .text-center {
             text-align: center;
         }
@@ -330,13 +416,13 @@
         }
         .col-actual {
             min-width: 80px;
-            font-weight: 500;
-            color: #1a2c40;
+            font-weight: 600;
+            color: #1a2a4a;
         }
         .col-total {
             min-width: 90px;
-            font-weight: 500;
-            color: #1a2c40;
+            font-weight: 600;
+            color: #1a2a4a;
         }
         .col-action {
             min-width: 100px;
@@ -344,50 +430,62 @@
         }
 
         .empty-row td {
-            padding: 20px 14px;
+            padding: 24px 14px;
             text-align: center;
             color: #8a9aa8;
             font-style: italic;
+            background: #fafcff !important;
         }
 
-        /* ---------- 报价结果 ---------- */
+        /* ========== 报价结果 ========== */
         .result-section {
             grid-column: 1 / -1;
             margin-top: 24px;
-            background: linear-gradient(145deg, #f2f8ff, #eef4fc);
+            background: linear-gradient(145deg, #f5f8fe, #eef3fa);
             border-radius: 20px;
             padding: 28px 32px;
             border: 1px solid #dce8f5;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 20px 30px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px 24px;
+            box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.8), 0 2px 8px rgba(26, 42, 74, 0.04);
         }
         .result-item {
             display: flex;
             flex-direction: column;
+            padding: 6px 4px;
+            border-radius: 12px;
+            transition: background 0.2s;
+        }
+        .result-item:hover {
+            background: rgba(255, 255, 255, 0.5);
         }
         .result-item .label {
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             color: #4f6b86;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
             margin-bottom: 2px;
         }
         .result-item .value {
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
             color: #0a1e30;
-            letter-spacing: -0.3px;
+            letter-spacing: -0.2px;
             line-height: 1.3;
         }
         .result-item .value.highlight {
-            color: #0f3b6b;
+            color: #1a2a4a;
             font-size: 30px;
+            background: linear-gradient(135deg, #1a2a4a, #2c5f8a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         .result-item .value .currency {
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             color: #5d7a97;
             margin-right: 2px;
         }
@@ -395,8 +493,8 @@
         @media (max-width: 600px) {
             .result-section {
                 grid-template-columns: 1fr 1fr;
-                gap: 16px;
-                padding: 20px;
+                gap: 12px 16px;
+                padding: 18px 20px;
             }
             .result-item .value {
                 font-size: 20px;
@@ -406,7 +504,7 @@
             }
         }
 
-        /* ---------- 款式管理 ---------- */
+        /* ========== 款式管理 ========== */
         .quote-management {
             grid-column: 1 / -1;
             margin-top: 28px;
@@ -423,20 +521,31 @@
         }
         .quote-management .header-row h3 {
             font-size: 17px;
-            font-weight: 600;
-            color: #1f2e3f;
+            font-weight: 700;
+            color: #1a2a4a;
+        }
+        .quote-management .header-row h3 span {
+            font-size: 13px;
+            font-weight: 400;
+            color: #6f859b;
         }
         .quote-management .header-row .actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
+
+        /* ========== 筛选行 ========== */
         .filter-row {
             display: flex;
-            gap: 16px;
+            gap: 14px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             align-items: center;
+            background: #f5f8fc;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid #e6edf6;
         }
         .filter-row .filter-group {
             display: flex;
@@ -445,8 +554,8 @@
             font-size: 13px;
         }
         .filter-row .filter-group label {
-            font-weight: 500;
-            color: #3d4f63;
+            font-weight: 600;
+            color: #2c3f5a;
         }
         .filter-row .filter-group input,
         .filter-row .filter-group select {
@@ -454,18 +563,26 @@
             border: 1.5px solid #dce3ec;
             border-radius: 8px;
             font-size: 13px;
-            background: #fafcff;
+            background: #ffffff;
             outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            transition: border 0.2s;
         }
         .filter-row .filter-group input:focus,
         .filter-row .filter-group select:focus {
-            border-color: #2a6b9e;
+            border-color: #2c5f8a;
         }
         .filter-row .btn {
             padding: 6px 16px;
             font-size: 13px;
         }
+        #filterResultCount {
+            font-size: 13px;
+            color: #6f859b;
+            margin-left: 6px;
+        }
 
+        /* ========== 款式列表表格 ========== */
         .quote-list-table {
             width: 100%;
             font-size: 13px;
@@ -473,8 +590,8 @@
         }
         .quote-list-table th {
             background: #f0f5fb;
-            color: #2a4057;
-            font-weight: 600;
+            color: #1a2a4a;
+            font-weight: 700;
             font-size: 11px;
             letter-spacing: 0.3px;
             text-transform: uppercase;
@@ -484,8 +601,12 @@
         }
         .quote-list-table td {
             padding: 10px 12px;
-            border-bottom: 1px solid #e9eff6;
+            border-bottom: 1px solid #eef2f8;
             vertical-align: middle;
+            background: #ffffff;
+        }
+        .quote-list-table tr:hover td {
+            background: #f6f9fe;
         }
         .quote-list-table .col-actions {
             text-align: center;
@@ -499,7 +620,11 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
-            accent-color: #1f3a57;
+            accent-color: #1a2a4a;
+            transition: transform 0.15s;
+        }
+        .quote-list-table .col-checkbox input[type="checkbox"]:hover {
+            transform: scale(1.1);
         }
         .quote-list-table .col-customer {
             min-width: 80px;
@@ -512,14 +637,15 @@
             font-size: 13px;
             color: #4a6a8b;
             background: #eef4fa;
-            padding: 4px 14px;
+            padding: 4px 16px;
             border-radius: 20px;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            border: 1px solid #dce6f0;
         }
 
-        /* ---------- 库管理按钮区域 ---------- */
+        /* ========== 库管理工具 ========== */
         .library-tools {
             grid-column: 1 / -1;
             margin-top: 12px;
@@ -531,11 +657,11 @@
             padding-top: 18px;
         }
         .library-tools .btn {
-            padding: 8px 24px;
+            padding: 8px 26px;
             font-size: 14px;
         }
 
-        /* ---------- 模态框 ---------- */
+        /* ========== 模态框 ========== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -543,24 +669,37 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(26, 42, 74, 0.45);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            animation: fadeIn 0.25s ease;
         }
         .modal-overlay.active {
             display: flex;
         }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .modal-box {
-            background: #fff;
-            border-radius: 24px;
+            background: #ffffff;
+            border-radius: 28px;
             max-width: 1200px;
             width: 100%;
             max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 30px 80px rgba(26, 42, 74, 0.25);
             overflow: hidden;
         }
         .modal-header {
@@ -569,11 +708,12 @@
             align-items: center;
             padding: 20px 28px;
             border-bottom: 2px solid #eef2f7;
+            background: #fafcff;
         }
         .modal-header h2 {
             font-size: 20px;
-            font-weight: 600;
-            color: #1a2634;
+            font-weight: 700;
+            color: #1a2a4a;
         }
         .modal-header .btn-close {
             background: none;
@@ -583,14 +723,17 @@
             color: #8a9aa8;
             padding: 0 8px;
             line-height: 1;
+            transition: color 0.2s, transform 0.2s;
         }
         .modal-header .btn-close:hover {
-            color: #1a2634;
+            color: #1a2a4a;
+            transform: rotate(90deg);
         }
         .modal-body {
             padding: 24px 28px;
             overflow-y: auto;
             flex: 1;
+            background: #fafcff;
         }
         .modal-body .form-row {
             margin-bottom: 12px;
@@ -603,7 +746,10 @@
         .modal-body .form-group select {
             padding: 8px 12px;
             font-size: 14px;
+            border-radius: 10px;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
         }
+
         .modal-body .lib-table {
             width: 100%;
             border-collapse: collapse;
@@ -612,8 +758,8 @@
         }
         .modal-body .lib-table th {
             background: #f0f5fb;
-            color: #2a4057;
-            font-weight: 600;
+            color: #1a2a4a;
+            font-weight: 700;
             font-size: 11px;
             padding: 10px 12px;
             text-align: left;
@@ -621,7 +767,7 @@
         }
         .modal-body .lib-table td {
             padding: 8px 12px;
-            border-bottom: 1px solid #e9eff6;
+            border-bottom: 1px solid #eef2f8;
             vertical-align: middle;
         }
         .modal-body .lib-table .btn-sm {
@@ -635,9 +781,10 @@
             justify-content: flex-end;
             gap: 12px;
             flex-wrap: wrap;
+            background: #fafcff;
         }
 
-        /* ---------- 底部操作 ---------- */
+        /* ========== 底部操作 ========== */
         .actions {
             grid-column: 1 / -1;
             display: flex;
@@ -662,14 +809,22 @@
             font-size: 13px;
             color: #6f859b;
             margin-top: 8px;
-            padding: 6px 12px;
+            padding: 6px 18px;
             background: #f0f5fb;
-            border-radius: 20px;
+            border-radius: 40px;
             display: inline-block;
             width: auto;
             justify-self: center;
+            border: 1px solid #e6edf6;
         }
 
+        /* ========== 总计标签 ========== */
+        .total-label {
+            font-weight: 600;
+            color: #1a2a4a;
+        }
+
+        /* ========== 打印 ========== */
         @media print {
             body {
                 background: #fff;
@@ -678,6 +833,7 @@
             .container {
                 box-shadow: none;
                 padding: 20px 24px;
+                border-radius: 0;
             }
             .btn,
             .actions .btn,
@@ -711,6 +867,43 @@
             .modal-overlay {
                 display: none !important;
             }
+            .header::after {
+                display: none;
+            }
+        }
+
+        /* ========== 杂项 ========== */
+        .mt-2 {
+            margin-top: 8px;
+        }
+        .mb-1 {
+            margin-bottom: 4px;
+        }
+        .gap-1 {
+            gap: 6px;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-center {
+            align-items: center;
+        }
+
+        /* ========== 滚动条美化 ========== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #eef2f7;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0cedc;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0b4cc;
         }
     </style>
 </head>
@@ -719,8 +912,8 @@
     <div class="container" id="app">
 
         <div class="header">
-            <h1>🧥 MSA服装报价系统</h1>
-            <span class="badge"><span class="dot"></span> 面料库·辅料库 · 自动保存</span>
+            <h1>🧥 MSA服装报价系统 <span>PRO</span></h1>
+            <span class="badge"><span class="dot"></span> 面料库 · 辅料库 · 自动保存</span>
         </div>
 
         <div class="grid-2">
@@ -749,7 +942,7 @@
             <div class="section-block">
                 <div class="section-header">
                     <div>
-                        <h3>🧶 面料明细</h3>
+                        <h3><span class="icon">🧶</span> 面料明细</h3>
                         <span class="sub">选择类型：梭织（仅需单件用料、单价、损耗） / 针织（需门幅、克重，自动+5cm）</span>
                     </div>
                     <button class="btn btn-primary" id="addFabricBtn">＋ 添加面料</button>
@@ -775,8 +968,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px;">
-                    面料总成本：<strong id="fabricTotalDisplay">¥0.00</strong>
+                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px; font-weight: 600;">
+                    面料总成本：<strong id="fabricTotalDisplay" style="color:#1a2a4a;">¥0.00</strong>
                 </div>
             </div>
 
@@ -784,7 +977,7 @@
             <div class="section-block">
                 <div class="section-header">
                     <div>
-                        <h3>🧵 辅料明细</h3>
+                        <h3><span class="icon">🧵</span> 辅料明细</h3>
                         <span class="sub">纽扣、拉链、衬布、线等</span>
                     </div>
                     <button class="btn btn-primary" id="addAccessoryBtn">＋ 添加辅料</button>
@@ -805,8 +998,8 @@
                         </tbody>
                     </table>
                 </div>
-                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px;">
-                    辅料总成本：<strong id="accessoryTotalDisplay">¥0.00</strong>
+                <div style="text-align: right; font-size: 14px; color: #3d5a78; margin-top: 4px; font-weight: 600;">
+                    辅料总成本：<strong id="accessoryTotalDisplay" style="color:#1a2a4a;">¥0.00</strong>
                 </div>
             </div>
 
@@ -885,7 +1078,7 @@
             <!-- ===== 款式管理 ===== -->
             <div class="quote-management">
                 <div class="header-row">
-                    <h3>📋 已保存款式列表 <span style="font-size:13px;font-weight:400;color:#6f859b;">（自动保存在浏览器中）</span></h3>
+                    <h3>📋 已保存款式列表 <span>（自动保存在浏览器中）</span></h3>
                     <div class="actions">
                         <button class="btn btn-success" id="saveQuoteBtn">💾 保存当前款式</button>
                         <button class="btn btn-primary" id="exportSelectedBtn">📊 导出选中款式</button>
@@ -909,7 +1102,7 @@
                     </div>
                     <button class="btn btn-sm btn-outline" id="applyFilterBtn">🔍 筛选</button>
                     <button class="btn btn-sm btn-outline" id="clearFilterBtn">清除筛选</button>
-                    <span style="font-size:13px;color:#6f859b;margin-left:8px;" id="filterResultCount"></span>
+                    <span id="filterResultCount"></span>
                 </div>
 
                 <div class="table-wrap">
@@ -1243,7 +1436,6 @@
                 });
                 tbody.innerHTML = html;
 
-                // 绑定删除事件
                 tbody.querySelectorAll('.lib-fabric-delete').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.idx, 10);
@@ -1254,7 +1446,6 @@
                         }
                     });
                 });
-                // 绑定编辑事件：填充到表单，删除原条目
                 tbody.querySelectorAll('.lib-fabric-edit').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.idx, 10);
@@ -1351,7 +1542,6 @@
                 });
                 saveLibraries();
                 renderFabricLib();
-                // 清空表单
                 document.getElementById('libFabricName').value = '';
                 document.getElementById('libFabricCode').value = '';
                 document.getElementById('libFabricSupplier').value = '';
@@ -1591,7 +1781,6 @@
                     });
                 });
 
-                // 删除按钮
                 fabricTbody.querySelectorAll('.remove-fabric').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.index, 10);
@@ -1603,7 +1792,6 @@
                     });
                 });
 
-                // 从库加载按钮 - 支持序号或代号
                 fabricTbody.querySelectorAll('.fabric-load-lib').forEach(btn => {
                     btn.addEventListener('click', function() {
                         const idx = parseInt(this.dataset.idx, 10);
@@ -1874,7 +2062,6 @@
 
             // ----- 获取选中的款式索引（基于当前筛选后的显示列表）-----
             function getSelectedIndices() {
-                // 只统计可见行中的选中
                 const visibleRows = quoteListBody.querySelectorAll('tr:not([style*="display: none"])');
                 const selected = [];
                 visibleRows.forEach(row => {
@@ -1892,7 +2079,6 @@
                 const selected = getSelectedIndices();
                 const total = quoteListBody.querySelectorAll('.quote-checkbox:not([style*="display: none"])').length;
                 selectedCountInfo.textContent = `✅ 已选中 ${selected.length} / ${total} 个款式（可见）`;
-                // 更新全选checkbox状态（只针对可见行）
                 const visibleCheckboxes = quoteListBody.querySelectorAll('.quote-checkbox:not([style*="display: none"])');
                 const checkedVisible = Array.from(visibleCheckboxes).filter(cb => cb.checked);
                 if (visibleCheckboxes.length > 0 && checkedVisible.length === visibleCheckboxes.length) {
@@ -1910,7 +2096,6 @@
             // ----- 保存/恢复选中状态 (存在localStorage) -----
             function saveSelectedState() {
                 try {
-                    // 保存所有checkbox的状态（包括隐藏的）
                     const checkboxes = quoteListBody.querySelectorAll('.quote-checkbox');
                     const state = [];
                     checkboxes.forEach(cb => {
@@ -2130,7 +2315,6 @@
                 }
             }
 
-            // 每次修改quoteList后自动保存
             function saveQuoteAndSync() {
                 saveToLocalStorage();
                 renderQuoteList();
@@ -2158,7 +2342,6 @@
 
             // ----- 导出选中的款式为 Excel（只导出可见且选中的）-----
             function exportSelectedQuotes() {
-                // 获取可见行中选中的
                 const visibleRows = quoteListBody.querySelectorAll('tr:not([style*="display: none"])');
                 const selectedIndices = [];
                 visibleRows.forEach(row => {
@@ -2460,7 +2643,6 @@
 
             // ----- 初始化 -----
             function init() {
-                // 加载库数据
                 loadLibraries();
                 renderFabricLib();
                 renderAccessoryLib();
@@ -2499,7 +2681,6 @@
                     }
                 });
 
-                // 款式管理事件
                 saveQuoteBtn.addEventListener('click', saveCurrentQuote);
                 exportSelectedBtn.addEventListener('click', exportSelectedQuotes);
                 clearQuotesBtn.addEventListener('click', clearQuoteList);
@@ -2514,7 +2695,6 @@
                 selectAllBtn.addEventListener('click', selectAll);
                 deselectAllBtn.addEventListener('click', deselectAll);
 
-                // 筛选事件
                 filterCustomer.addEventListener('change', function() {
                     applyFilter();
                 });
@@ -2534,7 +2714,6 @@
                     applyFilter();
                 });
 
-                // 库管理按钮
                 manageFabricLibBtn.addEventListener('click', function() {
                     openModal('fabricLibModal');
                 });
@@ -2547,7 +2726,6 @@
                         closeModal(modalId);
                     });
                 });
-                // 点击遮罩关闭
                 document.querySelectorAll('.modal-overlay').forEach(overlay => {
                     overlay.addEventListener('click', function(e) {
                         if (e.target === this) {
@@ -2556,16 +2734,12 @@
                     });
                 });
 
-                // 面料库添加
                 document.getElementById('addLibFabricBtn').addEventListener('click', addFabricLib);
-                // 辅料库添加
                 document.getElementById('addLibAccBtn').addEventListener('click', addAccessoryLib);
 
-                // 导出库Excel
                 document.getElementById('exportFabricLibBtn').addEventListener('click', exportFabricLibrary);
                 document.getElementById('exportAccessoryLibBtn').addEventListener('click', exportAccessoryLibrary);
 
-                // 在删除面料/辅料后保存
                 document.querySelector('#fabricTableBody').addEventListener('click', function(e) {
                     if (e.target.classList.contains('remove-fabric')) {
                         setTimeout(saveToLocalStorage, 0);
