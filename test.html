@@ -3,49 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <title>Supabase 注册诊断</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+  </script>
 </head>
 <body>
-  <h2>Supabase 注册诊断</h2>
-  <div>
-    <label>邮箱：<input type="email" id="email" value="test@example.com" /></label>
-  </div>
-  <div>
-    <label>密码：<input type="password" id="password" value="123456" /></label>
-  </div>
-  <button id="registerBtn">注册</button>
-  <div id="result"></div>
+  <h2>🔧 Supabase 注册诊断工具</h2>
+  <p>点击下方按钮测试注册，结果会显示在下方</p>
+  <button id="testBtn" style="padding:10px 20px;font-size:16px;">测试注册</button>
+  <div id="result" style="margin-top:20px;padding:10px;border:1px solid #ccc;min-height:40px;"></div>
 
   <script>
     const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.com';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s';
 
-    let supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const resultDiv = document.getElementById('result');
 
-    document.getElementById('registerBtn').addEventListener('click', async function() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const resultDiv = document.getElementById('result');
-
-      if (!email || !password) {
-        resultDiv.innerHTML = '❌ 请填写邮箱和密码';
-        return;
-      }
-
-      resultDiv.innerHTML = '⏳ 发送注册请求...';
-
+    document.getElementById('testBtn').addEventListener('click', async function() {
+      resultDiv.innerHTML = '⏳ 发送请求...';
       try {
-        console.log('尝试注册...');
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email: 'test_' + Date.now() + '@example.com',
+          password: '123456'
+        });
         if (error) {
-          resultDiv.innerHTML = `❌ 注册失败: ${error.message} (${error.status || '无状态码'})`;
-          console.error('完整错误:', error);
+          resultDiv.innerHTML = '❌ 注册失败: ' + error.message + (error.status ? ' (状态码: ' + error.status + ')' : '');
+          console.error(error);
         } else {
-          resultDiv.innerHTML = '✅ 注册成功！请查看邮箱确认（如果开启验证）。';
+          resultDiv.innerHTML = '✅ 注册成功！用户ID: ' + data.user.id;
         }
       } catch (e) {
-        resultDiv.innerHTML = `❌ 网络错误: ${e.message}`;
-        console.error('捕获异常:', e);
+        resultDiv.innerHTML = '❌ 网络错误: ' + e.message;
+        console.error(e);
       }
     });
   </script>
