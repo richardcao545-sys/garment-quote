@@ -10,33 +10,48 @@
   <h2>🔧 Supabase 注册诊断工具</h2>
   <p>点击下方按钮测试注册，结果会显示在下方</p>
   <button id="testBtn" style="padding:10px 20px;font-size:16px;">测试注册</button>
-  <div id="result" style="margin-top:20px;padding:10px;border:1px solid #ccc;min-height:40px;"></div>
+  <div id="result" style="margin-top:20px;padding:10px;border:1px solid #ccc;min-height:40px;white-space:pre-wrap;"></div>
 
   <script>
-    const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.com';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s';
+    // 使用 IIFE 避免全局变量污染
+    (function() {
+      const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.com';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNlaGt0bHRqa2lhcGdubGJjdHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NTYyNjQsImV4cCI6MjA5OTQzMjI2NH0.ZdqYkcdJb1O6HnG4slB9Yt8VhLKThk-7WEU648psU6s';
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const resultDiv = document.getElementById('result');
-
-    document.getElementById('testBtn').addEventListener('click', async function() {
-      resultDiv.innerHTML = '⏳ 发送请求...';
+      // 创建客户端，使用 let 避免重复声明
+      let supabaseClient = null;
       try {
-        const { data, error } = await supabase.auth.signUp({
-          email: 'test_' + Date.now() + '@example.com',
-          password: '123456'
-        });
-        if (error) {
-          resultDiv.innerHTML = '❌ 注册失败: ' + error.message + (error.status ? ' (状态码: ' + error.status + ')' : '');
-          console.error(error);
-        } else {
-          resultDiv.innerHTML = '✅ 注册成功！用户ID: ' + data.user.id;
-        }
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase 客户端初始化成功');
       } catch (e) {
-        resultDiv.innerHTML = '❌ 网络错误: ' + e.message;
-        console.error(e);
+        document.getElementById('result').innerHTML = '❌ 客户端初始化失败: ' + e.message;
+        return;
       }
-    });
+
+      const resultDiv = document.getElementById('result');
+
+      document.getElementById('testBtn').addEventListener('click', async function() {
+        resultDiv.innerHTML = '⏳ 发送注册请求...';
+        const randomEmail = 'test_' + Date.now() + '@example.com';
+        try {
+          console.log('尝试注册邮箱:', randomEmail);
+          const { data, error } = await supabaseClient.auth.signUp({
+            email: randomEmail,
+            password: '123456'
+          });
+          if (error) {
+            resultDiv.innerHTML = '❌ 注册失败: ' + error.message + (error.status ? ' (状态码: ' + error.status + ')' : '');
+            console.error('注册错误:', error);
+          } else {
+            resultDiv.innerHTML = '✅ 注册成功！用户ID: ' + data.user.id + '\n邮箱: ' + randomEmail;
+            console.log('注册成功:', data);
+          }
+        } catch (e) {
+          resultDiv.innerHTML = '❌ 网络错误或异常: ' + e.message + '\n请检查浏览器控制台查看详情。';
+          console.error('捕获异常:', e);
+        }
+      });
+    })();
   </script>
 </body>
 </html>
