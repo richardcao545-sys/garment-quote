@@ -1638,7 +1638,7 @@
             'use strict';
 
             // ============================================================
-            // 1. 配置 Supabase（已修正 .co 域名）
+            // 1. 配置 Supabase（已预填）
             // ============================================================
             const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.co';
             const SUPABASE_ANON_KEY =
@@ -1670,11 +1670,389 @@
             const supabaseUrlInput = document.getElementById('supabaseUrl');
             const supabaseAnonKeyInput = document.getElementById('supabaseAnonKey');
 
+            // 预填配置
             supabaseUrlInput.value = SUPABASE_URL;
             supabaseAnonKeyInput.value = SUPABASE_ANON_KEY;
 
             // ============================================================
-            // 3. 初始化 Supabase
+            // 3. 数据状态
+            // ============================================================
+            let fabrics = [];
+            let accessories = [];
+            let quoteList = [];
+            let fabricLibrary = [];
+            let accessoryLibrary = [];
+
+            // ============================================================
+            // 4. 工具函数
+            // ============================================================
+            function fmt(v) { return v.toFixed(2); }
+
+            function parseInput(val) {
+                if (val === '' || val === null || val === undefined) return 0;
+                const n = parseFloat(val.replace(/,/g, ''));
+                return isNaN(n) ? 0 : n;
+            }
+
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ============================================================
+            // 5. 计算逻辑
+            // ============================================================
+            function calcFabric(fabric) {
+                const type = fabric.type || '针织';
+                const usage = parseInput(fabric.usage);
+                const lossPct = parseInput(fabric.lossPercent);
+                const price = parseInput(fabric.pricePerKg);
+                const actualUsage = usage * (1 + lossPct / 100);
+                let cost = 0;
+                if (type === '梭织') {
+                    cost = actualUsage * price;
+                } else {
+                    const width = parseInput(fabric.width);
+                    const weight = parseInput(fabric.weight);
+                    const effectiveWidth = width + 0.05;
+                    cost = actualUsage * effectiveWidth * (weight / 1000) * price;
+                }
+                return { actualUsage, cost };
+            }
+
+            function computeQuote(quote) {
+                const qty = parseInput(quote.quantity);
+                const labor = parseInput(quote.laborCost);
+                const factor = parseInput(quote.laborFactor);
+                const profitPct = parseInput(quote.profitRate) / 100;
+                const taxPct = parseInput(quote.taxRate) / 100;
+                const rate = parseInput(quote.exchangeRate);
+
+                let fabricUnitTotal = 0;
+                (quote.fabrics || []).forEach(f => { const { cost } = calcFabric(f);
+                    fabricUnitTotal += cost; });
+                const fabricTotal = fabricUnitTotal * qty;
+
+                let accessoryUnitTotal = 0;
+                (quote.accessories || []).forEach(a => { accessoryUnitTotal += parseInput(a.price) * parseInput(a.qty); });
+                const accessoryTotal = accessoryUnitTotal * qty;
+
+                const effectiveLabor = labor * factor;
+                const laborTotal = effectiveLabor * qty;
+
+                const totalCost = fabricTotal + accessoryTotal + laborTotal;
+                const profit = totalCost * profitPct;
+                const priceExTax = totalCost + profit;
+                const taxAmount = priceExTax * taxPct;
+                const priceIncTax = priceExTax + taxAmount;
+                const unitPrice = qty > 0 ? priceIncTax / qty : 0;
+                const usdPrice = rate > 0 ? priceIncTax / rate : 0;
+
+                return { fabricTotal, accessoryTotal, laborTotal, totalCost, profit, priceExTax, taxAmount, priceIncTax,
+                    unitPrice, usdPrice, fabricUnitTotal, accessoryUnitTotal, effectiveLabor };
+            }
+
+            // ============================================================
+            // 6. 核心更新函数（每次修改数据后调用）
+            // ============================================================
+            function updateAll() {
+                console.log('🔄 updateAll 被调用');
+                // 先更新表格内的计算列（面料行和辅料行的中间列）
+                updateFabricRows();
+                updateAccessoryRows();
+
+                // 收集当前编辑区的数据
+                const quote = {
+                    quantity: document.getElementById('quantity').value,
+                    laborCost: document.getElementById('laborCost').value,
+                    laborFactor: document.getElementById('laborFactor').value,
+                    profitRate: document.getElementById('profitRate').value,
+                    taxRate: document.getElementById('taxRate').value,
+                    exchangeRate: document.getElementById('exchangeRate').value,
+                    fabrics: fabrics,
+                    accessories: accessories,
+                };
+                const result = computeQuote(quote);
+                console.log('📊 计算结果:', result);
+
+                // 更新页面上的显示
+                document.getElementById('fabricTotalDisplay').textContent = `¥${fmt(result.fabricTotal)}`;
+                document.getElementById('accessoryTotalDisplay').textContent = `¥${fmt(result.accessoryTotal)}`;
+                document.getElementById('fabricCostDisplay').textContent = `¥${fmt(result.fabricTotal)}`;
+                document.getElementById('accessoryCostDisplay').textContent = `¥${fmt(result.accessoryTotal)}`;
+                document.getElementById('laborDisplay').textContent = `¥${fmt(result.laborTotal)}`;
+                document.getElementById('totalCostDisplay').textContent = `¥${fmt(result.totalCost)}`;
+                document.getElementById('profitDisplay').textContent = `¥${fmt(result.profit)}`;
+                document.getElementById('priceExTaxDisplay').textContent = `¥${fmt(result.priceExTax)}`;
+                document.getElementById('taxDisplay').textContent = `¥${fmt(result.taxAmount)}`;
+                document.getElementById('priceIncTaxDisplay').textContent = `¥${fmt(result.priceIncTax)}`;
+                document.getElementById('unitPriceDisplay').textContent = `¥${fmt(result.unitPrice)}`;
+                document.getElementById('usdPriceDisplay').textContent = `$${fmt(result.usdPrice)}`;
+            }
+
+            // ============================================================
+            // 7. 面料明细渲染与事件绑定
+            // ============================================================
+            function renderFabrics() {
+                const tbody = document.getElementById('fabricTableBody');
+                if (fabrics.length === 0) {
+                    tbody.innerHTML = `<tr class="empty-row"><td colspan="12">暂无面料，点击 "添加面料" 开始添加</td></tr>`;
+                    return;
+                }
+                let html = '';
+                fabrics.forEach((f, idx) => {
+                    const { actualUsage, cost } = calcFabric(f);
+                    const type = f.type || '针织';
+                    const isWoven = (type === '梭织');
+                    html += `
+                        <tr data-index="${idx}">
+                            <td><input type="text" class="fabric-code" value="${escapeHtml(f.code || '')}" placeholder="代号" /></td>
+                            <td><input type="text" class="fabric-supplier" value="${escapeHtml(f.supplierCode || '')}" placeholder="供应商代码" /></td>
+                            <td><input type="text" class="fabric-name" value="${escapeHtml(f.name)}" placeholder="面料名称" /></td>
+                            <td><select class="fabric-type"><option value="梭织" ${isWoven?'selected':''}>梭织</option><option value="针织" ${!isWoven?'selected':''}>针织</option></select></td>
+                            <td><input type="text" class="fabric-width" value="${f.width||''}" placeholder="1.5" ${isWoven?'disabled':''} /></td>
+                            <td><input type="text" class="fabric-weight" value="${f.weight||''}" placeholder="200" ${isWoven?'disabled':''} /></td>
+                            <td><input type="text" class="fabric-price" value="${f.pricePerKg||''}" placeholder="单价" /></td>
+                            <td><input type="text" class="fabric-usage" value="${f.usage||''}" placeholder="1.2" /></td>
+                            <td><input type="text" class="fabric-loss" value="${f.lossPercent||''}" placeholder="5" /></td>
+                            <td class="col-actual">${fmt(actualUsage)}</td>
+                            <td class="col-total">¥${fmt(cost)}</td>
+                            <td class="col-action">
+                                <button class="btn btn-sm btn-info fabric-load-lib" data-idx="${idx}">📂库</button>
+                                <button class="btn btn-sm btn-danger remove-fabric" data-index="${idx}">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+
+                // --- 重新绑定所有输入事件（关键） ---
+                tbody.querySelectorAll('.fabric-code').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].code = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-supplier').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].supplierCode = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-name').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].name = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-type').forEach((sel, idx) => {
+                    sel.addEventListener('change', function() { fabrics[idx].type = this.value;
+                        renderFabrics();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-width').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].width = this.value;
+                        updateFabricRows();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-weight').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].weight = this.value;
+                        updateFabricRows();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-price').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].pricePerKg = this.value;
+                        updateFabricRows();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-usage').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].usage = this.value;
+                        updateFabricRows();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.fabric-loss').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { fabrics[idx].lossPercent = this.value;
+                        updateFabricRows();
+                        updateAll(); });
+                });
+
+                // 删除按钮
+                tbody.querySelectorAll('.remove-fabric').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index, 10);
+                        if (!isNaN(idx)) { fabrics.splice(idx, 1);
+                            renderFabrics();
+                            updateAll(); }
+                    });
+                });
+
+                // 从库加载按钮（简化示例，保留功能）
+                tbody.querySelectorAll('.fabric-load-lib').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx, 10);
+                        if (isNaN(idx)) return;
+                        if (fabricLibrary.length === 0) { alert('面料库为空'); return; }
+                        let list = '可用面料库（输入序号或代号）：\n';
+                        fabricLibrary.forEach((item, i) => { list += `${i+1}. 代号:${item.code||'无'} 名称:${item.name}\n`; });
+                        const input = prompt(list + '\n请输入序号（数字）或面料代号：');
+                        if (input === null) return;
+                        const trimmed = input.trim();
+                        if (trimmed === '') { alert('输入无效'); return; }
+                        let matched = null;
+                        const num = parseInt(trimmed);
+                        if (!isNaN(num) && num >= 1 && num <= fabricLibrary.length) { matched = fabricLibrary[num -
+                            1]; } else {
+                            matched = fabricLibrary.find(item => item.code === trimmed);
+                            if (!matched) { alert('未找到匹配的面料'); return; }
+                        }
+                        const f = fabrics[idx];
+                        f.code = matched.code || '';
+                        f.supplierCode = matched.supplier_code || '';
+                        f.name = matched.name || '';
+                        f.type = matched.type || '针织';
+                        f.width = matched.width || '';
+                        f.weight = matched.weight || '';
+                        f.pricePerKg = matched.price_per_kg || '';
+                        f.lossPercent = matched.loss_percent || '';
+                        renderFabrics();
+                        updateAll();
+                    });
+                });
+            }
+
+            function updateFabricRows() {
+                const rows = document.querySelectorAll('#fabricTableBody tr');
+                rows.forEach((row, idx) => {
+                    if (idx >= fabrics.length) return;
+                    const f = fabrics[idx];
+                    const { actualUsage, cost } = calcFabric(f);
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 11) { cells[9].textContent = fmt(actualUsage);
+                        cells[10].textContent = '¥' + fmt(cost); }
+                });
+            }
+
+            // ============================================================
+            // 8. 辅料明细渲染与事件绑定
+            // ============================================================
+            function renderAccessories() {
+                const tbody = document.getElementById('accessoryTableBody');
+                if (accessories.length === 0) {
+                    tbody.innerHTML =
+                        `<tr class="empty-row"><td colspan="7">暂无辅料，点击 "添加辅料" 开始添加</td></tr>`;
+                    return;
+                }
+                let html = '';
+                accessories.forEach((a, idx) => {
+                    const total = parseInput(a.price) * parseInput(a.qty);
+                    html += `
+                        <tr data-index="${idx}">
+                            <td><input type="text" class="acc-code" value="${escapeHtml(a.code||'')}" placeholder="代号" /></td>
+                            <td><input type="text" class="acc-supplier" value="${escapeHtml(a.supplierCode||'')}" placeholder="供应商代码" /></td>
+                            <td><input type="text" class="acc-name" value="${escapeHtml(a.name)}" placeholder="辅料名称" /></td>
+                            <td><input type="text" class="acc-price" value="${a.price}" placeholder="0.00" /></td>
+                            <td><input type="text" class="acc-qty" value="${a.qty}" placeholder="1" /></td>
+                            <td class="col-total">¥${fmt(total)}</td>
+                            <td class="col-action">
+                                <button class="btn btn-sm btn-info acc-load-lib" data-idx="${idx}">📂库</button>
+                                <button class="btn btn-sm btn-danger remove-acc" data-index="${idx}">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+
+                // 绑定事件
+                tbody.querySelectorAll('.acc-code').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { accessories[idx].code = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.acc-supplier').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { accessories[idx].supplierCode = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.acc-name').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { accessories[idx].name = this.value;
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.acc-price').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { accessories[idx].price = this.value;
+                        updateAccessoryRows();
+                        updateAll(); });
+                });
+                tbody.querySelectorAll('.acc-qty').forEach((inp, idx) => {
+                    inp.addEventListener('input', function() { accessories[idx].qty = this.value;
+                        updateAccessoryRows();
+                        updateAll(); });
+                });
+
+                tbody.querySelectorAll('.remove-acc').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index, 10);
+                        if (!isNaN(idx)) { accessories.splice(idx, 1);
+                            renderAccessories();
+                            updateAll(); }
+                    });
+                });
+
+                tbody.querySelectorAll('.acc-load-lib').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.idx, 10);
+                        if (isNaN(idx)) return;
+                        if (accessoryLibrary.length === 0) { alert('辅料库为空'); return; }
+                        let list = '可用辅料库（输入序号或代号）：\n';
+                        accessoryLibrary.forEach((item, i) => { list += `${i+1}. 代号:${item.code||'无'} 名称:${item.name}\n`; });
+                        const input = prompt(list + '请输入序号（数字）或辅料代号：');
+                        if (input === null) return;
+                        const trimmed = input.trim();
+                        if (trimmed === '') { alert('输入无效'); return; }
+                        let matched = null;
+                        const num = parseInt(trimmed);
+                        if (!isNaN(num) && num >= 1 && num <= accessoryLibrary.length) { matched =
+                            accessoryLibrary[num - 1]; } else {
+                            matched = accessoryLibrary.find(item => item.code === trimmed);
+                            if (!matched) { alert('未找到匹配的辅料'); return; }
+                        }
+                        const a = accessories[idx];
+                        a.code = matched.code || '';
+                        a.supplierCode = matched.supplier_code || '';
+                        a.name = matched.name || '';
+                        a.price = matched.price || '';
+                        renderAccessories();
+                        updateAll();
+                    });
+                });
+            }
+
+            function updateAccessoryRows() {
+                const rows = document.querySelectorAll('#accessoryTableBody tr');
+                rows.forEach((row, idx) => {
+                    if (idx >= accessories.length) return;
+                    const a = accessories[idx];
+                    const total = parseInput(a.price) * parseInput(a.qty);
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 6) { cells[5].textContent = '¥' + fmt(total); }
+                });
+            }
+
+            // ============================================================
+            // 9. 主表单输入事件绑定
+            // ============================================================
+            function bindMainInputs() {
+                const mainInputs = [
+                    'quantity', 'laborCost', 'laborFactor', 'profitRate', 'taxRate', 'exchangeRate'
+                ];
+                mainInputs.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.addEventListener('input', updateAll);
+                        el.addEventListener('change', updateAll);
+                    }
+                });
+                // 款式名称、客户代码等
+                ['styleName', 'customerCode', 'styleNumber'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', updateAll);
+                });
+            }
+
+            // ============================================================
+            // 10. 初始化 Supabase & 认证（与之前保持一致）
             // ============================================================
             function initSupabase() {
                 const url = supabaseUrlInput.value.trim();
@@ -1692,9 +2070,6 @@
                 }
             }
 
-            // ============================================================
-            // 4. 认证
-            // ============================================================
             async function handleLogin() {
                 if (!initSupabase()) return;
                 const email = loginEmail.value.trim();
@@ -1750,16 +2125,7 @@
             }
 
             // ============================================================
-            // 5. 数据状态
-            // ============================================================
-            let fabrics = [];
-            let accessories = [];
-            let quoteList = [];
-            let fabricLibrary = [];
-            let accessoryLibrary = [];
-
-            // ============================================================
-            // 6. 数据加载（从 Supabase）
+            // 11. 数据加载（从 Supabase）
             // ============================================================
             async function loadAllData() {
                 await Promise.all([
@@ -1805,7 +2171,7 @@
             }
 
             // ============================================================
-            // 7. 实时订阅
+            // 12. 实时订阅
             // ============================================================
             function setupRealtimeSubscriptions() {
                 if (!supabase) return;
@@ -1841,79 +2207,8 @@
             }
 
             // ============================================================
-            // 8. 工具函数
+            // 13. 面料库/辅料库渲染（用于模态框）
             // ============================================================
-            function fmt(v) { return v.toFixed(2); }
-
-            function parseInput(val) {
-                if (val === '' || val === null || val === undefined) return 0;
-                const n = parseFloat(val.replace(/,/g, ''));
-                return isNaN(n) ? 0 : n;
-            }
-
-            function escapeHtml(str) {
-                const div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            // ============================================================
-            // 9. 计算逻辑
-            // ============================================================
-            function calcFabric(fabric) {
-                const type = fabric.type || '针织';
-                const usage = parseInput(fabric.usage);
-                const lossPct = parseInput(fabric.lossPercent);
-                const price = parseInput(fabric.pricePerKg);
-                const actualUsage = usage * (1 + lossPct / 100);
-                let cost = 0;
-                if (type === '梭织') {
-                    cost = actualUsage * price;
-                } else {
-                    const width = parseInput(fabric.width);
-                    const weight = parseInput(fabric.weight);
-                    const effectiveWidth = width + 0.05;
-                    cost = actualUsage * effectiveWidth * (weight / 1000) * price;
-                }
-                return { actualUsage, cost };
-            }
-
-            function computeQuote(quote) {
-                const qty = parseInput(quote.quantity);
-                const labor = parseInput(quote.laborCost);
-                const factor = parseInput(quote.laborFactor);
-                const profitPct = parseInput(quote.profitRate) / 100;
-                const taxPct = parseInput(quote.taxRate) / 100;
-                const rate = parseInput(quote.exchangeRate);
-
-                let fabricUnitTotal = 0;
-                (quote.fabrics || []).forEach(f => { const { cost } = calcFabric(f);
-                    fabricUnitTotal += cost; });
-                const fabricTotal = fabricUnitTotal * qty;
-
-                let accessoryUnitTotal = 0;
-                (quote.accessories || []).forEach(a => { accessoryUnitTotal += parseInput(a.price) * parseInput(a.qty); });
-                const accessoryTotal = accessoryUnitTotal * qty;
-
-                const effectiveLabor = labor * factor;
-                const laborTotal = effectiveLabor * qty;
-
-                const totalCost = fabricTotal + accessoryTotal + laborTotal;
-                const profit = totalCost * profitPct;
-                const priceExTax = totalCost + profit;
-                const taxAmount = priceExTax * taxPct;
-                const priceIncTax = priceExTax + taxAmount;
-                const unitPrice = qty > 0 ? priceIncTax / qty : 0;
-                const usdPrice = rate > 0 ? priceIncTax / rate : 0;
-
-                return { fabricTotal, accessoryTotal, laborTotal, totalCost, profit, priceExTax, taxAmount, priceIncTax,
-                    unitPrice, usdPrice, fabricUnitTotal, accessoryUnitTotal, effectiveLabor };
-            }
-
-            // ============================================================
-            // 10. 渲染函数
-            // ============================================================
-            // ---- 面料库表格 ----
             function renderFabricLib() {
                 const tbody = document.getElementById('fabricLibBody');
                 if (fabricLibrary.length === 0) {
@@ -2001,7 +2296,6 @@
                 }
             }
 
-            // ---- 辅料库表格 ----
             function renderAccessoryLib() {
                 const tbody = document.getElementById('accessoryLibBody');
                 if (accessoryLibrary.length === 0) {
@@ -2075,7 +2369,9 @@
                 }
             }
 
-            // ---- 款式列表 ----
+            // ============================================================
+            // 14. 款式列表渲染（简化）
+            // ============================================================
             function renderQuoteList() {
                 const tbody = document.getElementById('quoteListBody');
                 if (quoteList.length === 0) {
@@ -2137,9 +2433,6 @@
                 updateSelectedCount();
             }
 
-            // ============================================================
-            // 11. 款式相关函数
-            // ============================================================
             function loadQuoteData(q) {
                 document.getElementById('customerCode').value = q.customer_code || '';
                 document.getElementById('styleNumber').value = q.style_number || '';
@@ -2187,259 +2480,7 @@
             }
 
             // ============================================================
-            // 12. 面料/辅料明细（当前编辑区）
-            // ============================================================
-            function renderFabrics() {
-                const tbody = document.getElementById('fabricTableBody');
-                if (fabrics.length === 0) {
-                    tbody.innerHTML = `<tr class="empty-row"><td colspan="12">暂无面料，点击 "添加面料" 开始添加</td></tr>`;
-                    return;
-                }
-                let html = '';
-                fabrics.forEach((f, idx) => {
-                    const { actualUsage, cost } = calcFabric(f);
-                    const type = f.type || '针织';
-                    const isWoven = (type === '梭织');
-                    html += `
-                        <tr data-index="${idx}">
-                            <td><input type="text" class="fabric-code" value="${escapeHtml(f.code || '')}" placeholder="代号" /></td>
-                            <td><input type="text" class="fabric-supplier" value="${escapeHtml(f.supplierCode || '')}" placeholder="供应商代码" /></td>
-                            <td><input type="text" class="fabric-name" value="${escapeHtml(f.name)}" placeholder="面料名称" /></td>
-                            <td><select class="fabric-type"><option value="梭织" ${isWoven?'selected':''}>梭织</option><option value="针织" ${!isWoven?'selected':''}>针织</option></select></td>
-                            <td><input type="text" class="fabric-width" value="${f.width||''}" placeholder="1.5" ${isWoven?'disabled':''} /></td>
-                            <td><input type="text" class="fabric-weight" value="${f.weight||''}" placeholder="200" ${isWoven?'disabled':''} /></td>
-                            <td><input type="text" class="fabric-price" value="${f.pricePerKg||''}" placeholder="单价" /></td>
-                            <td><input type="text" class="fabric-usage" value="${f.usage||''}" placeholder="1.2" /></td>
-                            <td><input type="text" class="fabric-loss" value="${f.lossPercent||''}" placeholder="5" /></td>
-                            <td class="col-actual">${fmt(actualUsage)}</td>
-                            <td class="col-total">¥${fmt(cost)}</td>
-                            <td class="col-action">
-                                <button class="btn btn-sm btn-info fabric-load-lib" data-idx="${idx}">📂库</button>
-                                <button class="btn btn-sm btn-danger remove-fabric" data-index="${idx}">✕</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-
-                tbody.querySelectorAll('.fabric-code').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].code = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-supplier').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].supplierCode = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-name').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].name = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-type').forEach((sel, idx) => { sel.addEventListener('change', function() { fabrics[
-                            idx].type = this.value;
-                        renderFabrics();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-width').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].width = this.value;
-                        updateFabricRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-weight').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].weight = this.value;
-                        updateFabricRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-price').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].pricePerKg = this.value;
-                        updateFabricRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-usage').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].usage = this.value;
-                        updateFabricRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.fabric-loss').forEach((inp, idx) => { inp.addEventListener('input', function() { fabrics[
-                            idx].lossPercent = this.value;
-                        updateFabricRows();
-                        updateAll(); }); });
-
-                tbody.querySelectorAll('.remove-fabric').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.index, 10);
-                        if (!isNaN(idx)) { fabrics.splice(idx, 1);
-                            renderFabrics();
-                            updateAll(); }
-                    });
-                });
-
-                tbody.querySelectorAll('.fabric-load-lib').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.idx, 10);
-                        if (isNaN(idx)) return;
-                        if (fabricLibrary.length === 0) { alert('面料库为空'); return; }
-                        let list = '可用面料库（输入序号或代号）：\n';
-                        fabricLibrary.forEach((item, i) => { list += `${i+1}. 代号:${item.code||'无'} 名称:${item.name}\n`; });
-                        const input = prompt(list + '\n请输入序号（数字）或面料代号：');
-                        if (input === null) return;
-                        const trimmed = input.trim();
-                        if (trimmed === '') { alert('输入无效'); return; }
-                        let matched = null;
-                        const num = parseInt(trimmed);
-                        if (!isNaN(num) && num >= 1 && num <= fabricLibrary.length) { matched = fabricLibrary[num -
-                            1]; } else {
-                            matched = fabricLibrary.find(item => item.code === trimmed);
-                            if (!matched) { alert('未找到匹配的面料'); return; }
-                        }
-                        const f = fabrics[idx];
-                        f.code = matched.code || '';
-                        f.supplierCode = matched.supplier_code || '';
-                        f.name = matched.name || '';
-                        f.type = matched.type || '针织';
-                        f.width = matched.width || '';
-                        f.weight = matched.weight || '';
-                        f.pricePerKg = matched.price_per_kg || '';
-                        f.lossPercent = matched.loss_percent || '';
-                        renderFabrics();
-                        updateAll();
-                    });
-                });
-            }
-
-            function updateFabricRows() {
-                const rows = document.querySelectorAll('#fabricTableBody tr');
-                rows.forEach((row, idx) => {
-                    if (idx >= fabrics.length) return;
-                    const f = fabrics[idx];
-                    const { actualUsage, cost } = calcFabric(f);
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 11) { cells[9].textContent = fmt(actualUsage);
-                        cells[10].textContent = '¥' + fmt(cost); }
-                });
-            }
-
-            // ---- 辅料明细 ----
-            function renderAccessories() {
-                const tbody = document.getElementById('accessoryTableBody');
-                if (accessories.length === 0) {
-                    tbody.innerHTML =
-                        `<tr class="empty-row"><td colspan="7">暂无辅料，点击 "添加辅料" 开始添加</td></tr>`;
-                    return;
-                }
-                let html = '';
-                accessories.forEach((a, idx) => {
-                    const total = parseInput(a.price) * parseInput(a.qty);
-                    html += `
-                        <tr data-index="${idx}">
-                            <td><input type="text" class="acc-code" value="${escapeHtml(a.code||'')}" placeholder="代号" /></td>
-                            <td><input type="text" class="acc-supplier" value="${escapeHtml(a.supplierCode||'')}" placeholder="供应商代码" /></td>
-                            <td><input type="text" class="acc-name" value="${escapeHtml(a.name)}" placeholder="辅料名称" /></td>
-                            <td><input type="text" class="acc-price" value="${a.price}" placeholder="0.00" /></td>
-                            <td><input type="text" class="acc-qty" value="${a.qty}" placeholder="1" /></td>
-                            <td class="col-total">¥${fmt(total)}</td>
-                            <td class="col-action">
-                                <button class="btn btn-sm btn-info acc-load-lib" data-idx="${idx}">📂库</button>
-                                <button class="btn btn-sm btn-danger remove-acc" data-index="${idx}">✕</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-
-                tbody.querySelectorAll('.acc-code').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].code = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-supplier').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].supplierCode = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-name').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].name = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-price').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].price = this.value;
-                        updateAccessoryRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-qty').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].qty = this.value;
-                        updateAccessoryRows();
-                        updateAll(); }); });
-
-                tbody.querySelectorAll('.remove-acc').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.index, 10);
-                        if (!isNaN(idx)) { accessories.splice(idx, 1);
-                            renderAccessories();
-                            updateAll(); }
-                    });
-                });
-
-                tbody.querySelectorAll('.acc-load-lib').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.idx, 10);
-                        if (isNaN(idx)) return;
-                        if (accessoryLibrary.length === 0) { alert('辅料库为空'); return; }
-                        let list = '可用辅料库（输入序号或代号）：\n';
-                        accessoryLibrary.forEach((item, i) => { list += `${i+1}. 代号:${item.code||'无'} 名称:${item.name}\n`; });
-                        const input = prompt(list + '请输入序号（数字）或辅料代号：');
-                        if (input === null) return;
-                        const trimmed = input.trim();
-                        if (trimmed === '') { alert('输入无效'); return; }
-                        let matched = null;
-                        const num = parseInt(trimmed);
-                        if (!isNaN(num) && num >= 1 && num <= accessoryLibrary.length) { matched =
-                            accessoryLibrary[num - 1]; } else {
-                            matched = accessoryLibrary.find(item => item.code === trimmed);
-                            if (!matched) { alert('未找到匹配的辅料'); return; }
-                        }
-                        const a = accessories[idx];
-                        a.code = matched.code || '';
-                        a.supplierCode = matched.supplier_code || '';
-                        a.name = matched.name || '';
-                        a.price = matched.price || '';
-                        renderAccessories();
-                        updateAll();
-                    });
-                });
-            }
-
-            function updateAccessoryRows() {
-                const rows = document.querySelectorAll('#accessoryTableBody tr');
-                rows.forEach((row, idx) => {
-                    if (idx >= accessories.length) return;
-                    const a = accessories[idx];
-                    const total = parseInput(a.price) * parseInput(a.qty);
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length >= 6) { cells[5].textContent = '¥' + fmt(total); }
-                });
-            }
-
-            // ============================================================
-            // 13. updateAll
-            // ============================================================
-            function updateAll() {
-                updateFabricRows();
-                updateAccessoryRows();
-
-                const quote = {
-                    quantity: document.getElementById('quantity').value,
-                    laborCost: document.getElementById('laborCost').value,
-                    laborFactor: document.getElementById('laborFactor').value,
-                    profitRate: document.getElementById('profitRate').value,
-                    taxRate: document.getElementById('taxRate').value,
-                    exchangeRate: document.getElementById('exchangeRate').value,
-                    fabrics: fabrics,
-                    accessories: accessories,
-                };
-                const result = computeQuote(quote);
-
-                document.getElementById('fabricTotalDisplay').textContent = `¥${fmt(result.fabricTotal)}`;
-                document.getElementById('accessoryTotalDisplay').textContent = `¥${fmt(result.accessoryTotal)}`;
-                document.getElementById('fabricCostDisplay').textContent = `¥${fmt(result.fabricTotal)}`;
-                document.getElementById('accessoryCostDisplay').textContent = `¥${fmt(result.accessoryTotal)}`;
-                document.getElementById('laborDisplay').textContent = `¥${fmt(result.laborTotal)}`;
-                document.getElementById('totalCostDisplay').textContent = `¥${fmt(result.totalCost)}`;
-                document.getElementById('profitDisplay').textContent = `¥${fmt(result.profit)}`;
-                document.getElementById('priceExTaxDisplay').textContent = `¥${fmt(result.priceExTax)}`;
-                document.getElementById('taxDisplay').textContent = `¥${fmt(result.taxAmount)}`;
-                document.getElementById('priceIncTaxDisplay').textContent = `¥${fmt(result.priceIncTax)}`;
-                document.getElementById('unitPriceDisplay').textContent = `¥${fmt(result.unitPrice)}`;
-                document.getElementById('usdPriceDisplay').textContent = `$${fmt(result.usdPrice)}`;
-            }
-
-            // ============================================================
-            // 14. 筛选与选择
+            // 15. 筛选相关函数（简略）
             // ============================================================
             function applyFabricLibFilters() {
                 const keyword = document.getElementById('fabricLibSearch').value.trim().toLowerCase();
@@ -2525,7 +2566,9 @@
                 document.getElementById('accessorySelectionInfo').textContent = `已选 ${count} 项`;
             }
 
-            // ---- 导出选中面料 ----
+            // ============================================================
+            // 16. 导出选中项（简略）
+            // ============================================================
             async function exportSelectedFabric() {
                 const ids = getFabricSelectedIndices();
                 if (ids.length === 0) { alert('请至少选择一个面料条目'); return; }
@@ -2568,7 +2611,9 @@
                 XLSX.writeFile(wb, `辅料库_选中_${new Date().toISOString().slice(0,10)}.xlsx`);
             }
 
-            // ---- 全选/反选 ----
+            // ============================================================
+            // 17. 全选/反选（简略）
+            // ============================================================
             function fabricSelectAllVisible() {
                 document.querySelectorAll('#fabricLibBody tr:not(.empty-row)').forEach(row => {
                     if (row.style.display === 'none') return;
@@ -2623,7 +2668,9 @@
                 updateAccessorySelectionInfo();
             }
 
-            // ---- 供应商筛选下拉 ----
+            // ============================================================
+            // 18. 供应商筛选下拉
+            // ============================================================
             function updateFabricSupplierFilter() {
                 const select = document.getElementById('fabricExportSupplier');
                 const suppliers = new Set();
@@ -2656,7 +2703,9 @@
                 applyAccessoryLibFilters();
             }
 
-            // ---- 款式筛选 ----
+            // ============================================================
+            // 19. 款式筛选
+            // ============================================================
             function updateFilterDropdown() {
                 const customers = new Set();
                 quoteList.forEach(q => { if (q.customer_code && q.customer_code.trim()) customers.add(q.customer_code
@@ -2743,7 +2792,267 @@
             }
 
             // ============================================================
-            // 15. 导出选中的款式（Excel）
+            // 20. 导入JSON备份（修复版）
+            // ============================================================
+            function saveJsonBackup() {
+                const data = {
+                    quoteList: quoteList,
+                    current: {
+                        customerCode: document.getElementById('customerCode').value,
+                        styleNumber: document.getElementById('styleNumber').value,
+                        styleName: document.getElementById('styleName').value,
+                        quantity: document.getElementById('quantity').value,
+                        fabrics: fabrics,
+                        accessories: accessories,
+                        laborCost: document.getElementById('laborCost').value,
+                        laborFactor: document.getElementById('laborFactor').value,
+                        profitRate: document.getElementById('profitRate').value,
+                        taxRate: document.getElementById('taxRate').value,
+                        exchangeRate: document.getElementById('exchangeRate').value,
+                    },
+                    fabricLibrary: fabricLibrary,
+                    accessoryLibrary: accessoryLibrary,
+                };
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `报价备份_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+
+            function loadJsonBackup(file) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (!supabase) { alert('未连接到云数据库'); return; }
+
+                        // 导入面料库
+                        if (data.fabricLibrary && data.fabricLibrary.length > 0) {
+                            for (const item of data.fabricLibrary) {
+                                delete item.id;
+                                await supabase.from('fabrics').insert([{
+                                    name: item.name,
+                                    code: item.code || '',
+                                    composition: item.composition || '',
+                                    supplier_code: item.supplier_code || '',
+                                    type: item.type || '针织',
+                                    width: item.width || '',
+                                    weight: item.weight || '',
+                                    price_per_kg: item.price_per_kg || '',
+                                    loss_percent: item.loss_percent || '',
+                                    description: item.description || ''
+                                }]);
+                            }
+                        }
+
+                        // 导入辅料库
+                        if (data.accessoryLibrary && data.accessoryLibrary.length > 0) {
+                            for (const item of data.accessoryLibrary) {
+                                delete item.id;
+                                await supabase.from('accessories').insert([{
+                                    name: item.name,
+                                    code: item.code || '',
+                                    supplier_code: item.supplier_code || '',
+                                    price: item.price || ''
+                                }]);
+                            }
+                        }
+
+                        // 导入款式列表
+                        if (data.quoteList && data.quoteList.length > 0) {
+                            for (const q of data.quoteList) {
+                                delete q.id;
+                                await supabase.from('quotes').insert([{
+                                    customer_code: q.customer_code || '',
+                                    style_number: q.style_number || '',
+                                    style_name: q.style_name || '',
+                                    quantity: q.quantity || '100',
+                                    fabrics: q.fabrics || [],
+                                    accessories: q.accessories || [],
+                                    labor_cost: q.labor_cost || '0',
+                                    labor_factor: q.labor_factor || '1.00',
+                                    profit_rate: q.profit_rate || '25',
+                                    tax_rate: q.tax_rate || '13',
+                                    exchange_rate: q.exchange_rate || '7.20'
+                                }]);
+                            }
+                        }
+
+                        await loadAllData();
+                        alert('✅ 导入成功！所有数据已合并到云端。');
+                    } catch (err) {
+                        alert('❌ 导入失败: ' + err.message);
+                        console.error('导入错误:', err);
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            // ============================================================
+            // 21. 重置示例
+            // ============================================================
+            function resetToExample() {
+                document.getElementById('customerCode').value = 'C001';
+                document.getElementById('styleNumber').value = 'STYLE-001';
+                document.getElementById('styleName').value = '经典棉质衬衫';
+                document.getElementById('quantity').value = '100';
+                document.getElementById('laborCost').value = '38.00';
+                document.getElementById('laborFactor').value = '1.30';
+                document.getElementById('profitRate').value = '25';
+                document.getElementById('taxRate').value = '13';
+                document.getElementById('exchangeRate').value = '7.20';
+
+                fabrics = [
+                    { code: 'F-001', supplierCode: 'SUP-01', name: '棉布', type: '针织', width: '1.5', weight: '200',
+                        pricePerKg: '50', usage: '1.2', lossPercent: '5' },
+                    { code: 'F-002', supplierCode: 'SUP-01', name: '里布', type: '针织', width: '1.4', weight: '120',
+                        pricePerKg: '35', usage: '0.8', lossPercent: '3' },
+                    { code: 'F-003', supplierCode: 'SUP-02', name: '衬布', type: '梭织', width: '', weight: '',
+                        pricePerKg: '28', usage: '0.5', lossPercent: '2' },
+                ];
+                accessories = [
+                    { code: 'A-001', supplierCode: 'SUP-03', name: '树脂纽扣', price: '1.20', qty: '7' },
+                    { code: 'A-002', supplierCode: 'SUP-03', name: '涤纶缝纫线', price: '0.80', qty: '3' },
+                    { code: 'A-003', supplierCode: 'SUP-04', name: '吊牌+洗标', price: '0.90', qty: '1' },
+                ];
+                renderFabrics();
+                renderAccessories();
+                updateAll();
+            }
+
+            // ============================================================
+            // 22. 模态框控制
+            // ============================================================
+            function openModal(modalId) {
+                document.getElementById(modalId).classList.add('active');
+                const box = document.querySelector(`#${modalId} .modal-box`);
+                if (box) box.classList.remove('maximized');
+            }
+
+            function closeModal(modalId) {
+                document.getElementById(modalId).classList.remove('active');
+            }
+
+            function toggleMaximize(box) {
+                box.classList.toggle('maximized');
+            }
+
+            function toggleFilterPanel(panelId, btnId) {
+                const panel = document.getElementById(panelId);
+                const btn = document.getElementById(btnId);
+                if (!panel || !btn) return;
+                if (panel.classList.contains('collapsed')) {
+                    panel.classList.remove('collapsed');
+                    btn.textContent = '▲ 收起筛选';
+                } else {
+                    panel.classList.add('collapsed');
+                    btn.textContent = '▼ 展开筛选';
+                }
+            }
+
+            // ============================================================
+            // 23. 添加面料/辅料到库
+            // ============================================================
+            async function addFabricLib() {
+                const name = document.getElementById('libFabricName').value.trim();
+                if (!name) { alert('请输入面料名称'); return; }
+                if (!supabase) { alert('未连接到云数据库'); return; }
+                const data = {
+                    name: name,
+                    code: document.getElementById('libFabricCode').value.trim(),
+                    composition: document.getElementById('libFabricComposition').value.trim(),
+                    supplier_code: document.getElementById('libFabricSupplier').value.trim(),
+                    type: document.getElementById('libFabricType').value,
+                    width: document.getElementById('libFabricWidth').value,
+                    weight: document.getElementById('libFabricWeight').value,
+                    price_per_kg: document.getElementById('libFabricPrice').value,
+                    loss_percent: document.getElementById('libFabricLoss').value,
+                    description: document.getElementById('libFabricDesc').value.trim(),
+                };
+                const { error } = await supabase.from('fabrics').insert([data]);
+                if (error) { alert('添加失败: ' + error.message); return; }
+                await loadFabricLibrary();
+                renderFabricLib();
+                updateFabricSupplierFilter();
+                document.getElementById('libFabricName').value = '';
+                document.getElementById('libFabricCode').value = '';
+                document.getElementById('libFabricComposition').value = '';
+                document.getElementById('libFabricSupplier').value = '';
+                document.getElementById('libFabricWidth').value = '';
+                document.getElementById('libFabricWeight').value = '';
+                document.getElementById('libFabricPrice').value = '';
+                document.getElementById('libFabricLoss').value = '';
+                document.getElementById('libFabricDesc').value = '';
+            }
+
+            async function addAccessoryLib() {
+                const name = document.getElementById('libAccName').value.trim();
+                if (!name) { alert('请输入辅料名称'); return; }
+                if (!supabase) { alert('未连接到云数据库'); return; }
+                const data = {
+                    name: name,
+                    code: document.getElementById('libAccCode').value.trim(),
+                    supplier_code: document.getElementById('libAccSupplier').value.trim(),
+                    price: document.getElementById('libAccPrice').value,
+                };
+                const { error } = await supabase.from('accessories').insert([data]);
+                if (error) { alert('添加失败: ' + error.message); return; }
+                await loadAccessoryLibrary();
+                renderAccessoryLib();
+                updateAccessorySupplierFilter();
+                document.getElementById('libAccName').value = '';
+                document.getElementById('libAccCode').value = '';
+                document.getElementById('libAccSupplier').value = '';
+                document.getElementById('libAccPrice').value = '';
+            }
+
+            // ============================================================
+            // 24. 导出全部库Excel
+            // ============================================================
+            function exportFabricLibrary() {
+                if (fabricLibrary.length === 0) { alert('面料库为空'); return; }
+                const data = fabricLibrary.map(item => ({
+                    '代号': item.code || '',
+                    '名称': item.name,
+                    '成分': item.composition || '',
+                    '供应商代码': item.supplier_code || '',
+                    '类型': item.type,
+                    '门幅(米)': item.width || '',
+                    '克重(g/m²)': item.weight || '',
+                    '单价(元/单位)': item.price_per_kg,
+                    '损耗(%)': item.loss_percent,
+                    '描述': item.description || ''
+                }));
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '面料库');
+                ws['!cols'] = [{ wch: 12 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 },
+                    { wch: 14 }, { wch: 10 }, { wch: 20 }
+                ];
+                XLSX.writeFile(wb, `面料库_全部_${new Date().toISOString().slice(0,10)}.xlsx`);
+            }
+
+            function exportAccessoryLibrary() {
+                if (accessoryLibrary.length === 0) { alert('辅料库为空'); return; }
+                const data = accessoryLibrary.map(item => ({
+                    '代号': item.code || '',
+                    '名称': item.name,
+                    '供应商代码': item.supplier_code || '',
+                    '单价(元)': item.price
+                }));
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, '辅料库');
+                ws['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 14 }, { wch: 12 }];
+                XLSX.writeFile(wb, `辅料库_全部_${new Date().toISOString().slice(0,10)}.xlsx`);
+            }
+
+            // ============================================================
+            // 25. 导出选中的款式（Excel）
             // ============================================================
             function exportSelectedQuotes() {
                 const visibleRows = document.querySelectorAll('#quoteListBody tr:not([style*="display: none"])');
@@ -2849,259 +3158,7 @@
             }
 
             // ============================================================
-            // 16. 添加面料/辅料到库
-            // ============================================================
-            async function addFabricLib() {
-                const name = document.getElementById('libFabricName').value.trim();
-                if (!name) { alert('请输入面料名称'); return; }
-                if (!supabase) { alert('未连接到云数据库'); return; }
-                const data = {
-                    name: name,
-                    code: document.getElementById('libFabricCode').value.trim(),
-                    composition: document.getElementById('libFabricComposition').value.trim(),
-                    supplier_code: document.getElementById('libFabricSupplier').value.trim(),
-                    type: document.getElementById('libFabricType').value,
-                    width: document.getElementById('libFabricWidth').value,
-                    weight: document.getElementById('libFabricWeight').value,
-                    price_per_kg: document.getElementById('libFabricPrice').value,
-                    loss_percent: document.getElementById('libFabricLoss').value,
-                    description: document.getElementById('libFabricDesc').value.trim(),
-                };
-                const { error } = await supabase.from('fabrics').insert([data]);
-                if (error) { alert('添加失败: ' + error.message); return; }
-                await loadFabricLibrary();
-                renderFabricLib();
-                updateFabricSupplierFilter();
-                document.getElementById('libFabricName').value = '';
-                document.getElementById('libFabricCode').value = '';
-                document.getElementById('libFabricComposition').value = '';
-                document.getElementById('libFabricSupplier').value = '';
-                document.getElementById('libFabricWidth').value = '';
-                document.getElementById('libFabricWeight').value = '';
-                document.getElementById('libFabricPrice').value = '';
-                document.getElementById('libFabricLoss').value = '';
-                document.getElementById('libFabricDesc').value = '';
-            }
-
-            async function addAccessoryLib() {
-                const name = document.getElementById('libAccName').value.trim();
-                if (!name) { alert('请输入辅料名称'); return; }
-                if (!supabase) { alert('未连接到云数据库'); return; }
-                const data = {
-                    name: name,
-                    code: document.getElementById('libAccCode').value.trim(),
-                    supplier_code: document.getElementById('libAccSupplier').value.trim(),
-                    price: document.getElementById('libAccPrice').value,
-                };
-                const { error } = await supabase.from('accessories').insert([data]);
-                if (error) { alert('添加失败: ' + error.message); return; }
-                await loadAccessoryLibrary();
-                renderAccessoryLib();
-                updateAccessorySupplierFilter();
-                document.getElementById('libAccName').value = '';
-                document.getElementById('libAccCode').value = '';
-                document.getElementById('libAccSupplier').value = '';
-                document.getElementById('libAccPrice').value = '';
-            }
-
-            // ============================================================
-            // 17. 导出全部库Excel
-            // ============================================================
-            function exportFabricLibrary() {
-                if (fabricLibrary.length === 0) { alert('面料库为空'); return; }
-                const data = fabricLibrary.map(item => ({
-                    '代号': item.code || '',
-                    '名称': item.name,
-                    '成分': item.composition || '',
-                    '供应商代码': item.supplier_code || '',
-                    '类型': item.type,
-                    '门幅(米)': item.width || '',
-                    '克重(g/m²)': item.weight || '',
-                    '单价(元/单位)': item.price_per_kg,
-                    '损耗(%)': item.loss_percent,
-                    '描述': item.description || ''
-                }));
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, '面料库');
-                ws['!cols'] = [{ wch: 12 }, { wch: 16 }, { wch: 18 }, { wch: 14 }, { wch: 10 }, { wch: 10 }, { wch: 12 },
-                    { wch: 14 }, { wch: 10 }, { wch: 20 }
-                ];
-                XLSX.writeFile(wb, `面料库_全部_${new Date().toISOString().slice(0,10)}.xlsx`);
-            }
-
-            function exportAccessoryLibrary() {
-                if (accessoryLibrary.length === 0) { alert('辅料库为空'); return; }
-                const data = accessoryLibrary.map(item => ({
-                    '代号': item.code || '',
-                    '名称': item.name,
-                    '供应商代码': item.supplier_code || '',
-                    '单价(元)': item.price
-                }));
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, '辅料库');
-                ws['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 14 }, { wch: 12 }];
-                XLSX.writeFile(wb, `辅料库_全部_${new Date().toISOString().slice(0,10)}.xlsx`);
-            }
-
-            // ============================================================
-            // 18. JSON 备份（修复导入）
-            // ============================================================
-            function saveJsonBackup() {
-                const data = {
-                    fabricLibrary: fabricLibrary,
-                    accessoryLibrary: accessoryLibrary,
-                    quoteList: quoteList,
-                    exportedAt: new Date().toISOString()
-                };
-                const json = JSON.stringify(data, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `报价备份_${new Date().toISOString().slice(0,10)}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-
-            // ============================================================
-            // 核心修复：导入 JSON 备份（移除 ID，避免主键冲突）
-            // ============================================================
-            function loadJsonBackup(file) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (!supabase) { alert('未连接到云数据库'); return; }
-
-                        // ----- 导入面料库 -----
-                        if (data.fabricLibrary && data.fabricLibrary.length > 0) {
-                            for (const item of data.fabricLibrary) {
-                                delete item.id; // 移除旧 ID，让数据库自动生成
-                                await supabase.from('fabrics').insert([{
-                                    name: item.name,
-                                    code: item.code || '',
-                                    composition: item.composition || '',
-                                    supplier_code: item.supplier_code || '',
-                                    type: item.type || '针织',
-                                    width: item.width || '',
-                                    weight: item.weight || '',
-                                    price_per_kg: item.price_per_kg || '',
-                                    loss_percent: item.loss_percent || '',
-                                    description: item.description || ''
-                                }]);
-                            }
-                        }
-
-                        // ----- 导入辅料库 -----
-                        if (data.accessoryLibrary && data.accessoryLibrary.length > 0) {
-                            for (const item of data.accessoryLibrary) {
-                                delete item.id;
-                                await supabase.from('accessories').insert([{
-                                    name: item.name,
-                                    code: item.code || '',
-                                    supplier_code: item.supplier_code || '',
-                                    price: item.price || ''
-                                }]);
-                            }
-                        }
-
-                        // ----- 导入款式列表 -----
-                        if (data.quoteList && data.quoteList.length > 0) {
-                            for (const q of data.quoteList) {
-                                delete q.id;
-                                await supabase.from('quotes').insert([{
-                                    customer_code: q.customer_code || '',
-                                    style_number: q.style_number || '',
-                                    style_name: q.style_name || '',
-                                    quantity: q.quantity || '100',
-                                    fabrics: q.fabrics || [],
-                                    accessories: q.accessories || [],
-                                    labor_cost: q.labor_cost || '0',
-                                    labor_factor: q.labor_factor || '1.00',
-                                    profit_rate: q.profit_rate || '25',
-                                    tax_rate: q.tax_rate || '13',
-                                    exchange_rate: q.exchange_rate || '7.20'
-                                }]);
-                            }
-                        }
-
-                        // 重新加载所有数据并刷新界面
-                        await loadAllData();
-                        alert('✅ 导入成功！所有数据已合并到云端。');
-                    } catch (err) {
-                        alert('❌ 导入失败: ' + err.message);
-                        console.error('导入错误:', err);
-                    }
-                };
-                reader.readAsText(file);
-            }
-
-            // ============================================================
-            // 19. 重置示例
-            // ============================================================
-            function resetToExample() {
-                document.getElementById('customerCode').value = 'C001';
-                document.getElementById('styleNumber').value = 'STYLE-001';
-                document.getElementById('styleName').value = '经典棉质衬衫';
-                document.getElementById('quantity').value = '100';
-                document.getElementById('laborCost').value = '38.00';
-                document.getElementById('laborFactor').value = '1.30';
-                document.getElementById('profitRate').value = '25';
-                document.getElementById('taxRate').value = '13';
-                document.getElementById('exchangeRate').value = '7.20';
-
-                fabrics = [
-                    { code: 'F-001', supplierCode: 'SUP-01', name: '棉布', type: '针织', width: '1.5', weight: '200',
-                        pricePerKg: '50', usage: '1.2', lossPercent: '5' },
-                    { code: 'F-002', supplierCode: 'SUP-01', name: '里布', type: '针织', width: '1.4', weight: '120',
-                        pricePerKg: '35', usage: '0.8', lossPercent: '3' },
-                    { code: 'F-003', supplierCode: 'SUP-02', name: '衬布', type: '梭织', width: '', weight: '',
-                        pricePerKg: '28', usage: '0.5', lossPercent: '2' },
-                ];
-                accessories = [
-                    { code: 'A-001', supplierCode: 'SUP-03', name: '树脂纽扣', price: '1.20', qty: '7' },
-                    { code: 'A-002', supplierCode: 'SUP-03', name: '涤纶缝纫线', price: '0.80', qty: '3' },
-                    { code: 'A-003', supplierCode: 'SUP-04', name: '吊牌+洗标', price: '0.90', qty: '1' },
-                ];
-                renderFabrics();
-                renderAccessories();
-                updateAll();
-            }
-
-            // ============================================================
-            // 20. 模态框控制
-            // ============================================================
-            function openModal(modalId) {
-                document.getElementById(modalId).classList.add('active');
-                const box = document.querySelector(`#${modalId} .modal-box`);
-                if (box) box.classList.remove('maximized');
-            }
-
-            function closeModal(modalId) {
-                document.getElementById(modalId).classList.remove('active');
-            }
-
-            function toggleMaximize(box) {
-                box.classList.toggle('maximized');
-            }
-
-            function toggleFilterPanel(panelId, btnId) {
-                const panel = document.getElementById(panelId);
-                const btn = document.getElementById(btnId);
-                if (!panel || !btn) return;
-                if (panel.classList.contains('collapsed')) {
-                    panel.classList.remove('collapsed');
-                    btn.textContent = '▲ 收起筛选';
-                } else {
-                    panel.classList.add('collapsed');
-                    btn.textContent = '▼ 展开筛选';
-                }
-            }
-
-            // ============================================================
-            // 21. 初始化
+            // 26. 初始化
             // ============================================================
             function init() {
                 // 认证切换
@@ -3226,7 +3283,6 @@
                 document.getElementById('loadJsonBtn').addEventListener('click', function() {
                     document.getElementById('fileInput').click();
                 });
-                // 绑定导入事件
                 document.getElementById('fileInput').addEventListener('change', function(e) {
                     if (this.files && this.files[0]) {
                         loadJsonBackup(this.files[0]);
@@ -3314,6 +3370,9 @@
                     applyFabricLibFilters();
                 });
 
+                // 绑定主表单事件（关键修复）
+                bindMainInputs();
+
                 window.addEventListener('beforeunload', function() {
                     saveSelectedState();
                 });
@@ -3322,7 +3381,9 @@
                 checkSession();
             }
 
-            // 辅助函数
+            // ============================================================
+            // 27. 辅助添加函数（全局）
+            // ============================================================
             function addFabric(name, type, width, weight, price, usage, lossPct, code, supplier) {
                 fabrics.push({
                     code: code || '',
@@ -3351,98 +3412,14 @@
                 updateAll();
             }
 
+            // 暴露给全局以便调试
             window.addFabric = addFabric;
             window.addAccessory = addAccessory;
+            window.updateAll = updateAll;
 
-            // 修复 renderAccessories 的引用
-            const accessoryTbody = document.getElementById('accessoryTableBody');
-            const origRenderAcc = renderAccessories;
-            renderAccessories = function() {
-                const tbody = document.getElementById('accessoryTableBody');
-                if (accessories.length === 0) {
-                    tbody.innerHTML =
-                        `<tr class="empty-row"><td colspan="7">暂无辅料，点击 "添加辅料" 开始添加</td></tr>`;
-                    return;
-                }
-                let html = '';
-                accessories.forEach((a, idx) => {
-                    const total = parseInput(a.price) * parseInput(a.qty);
-                    html += `
-                        <tr data-index="${idx}">
-                            <td><input type="text" class="acc-code" value="${escapeHtml(a.code||'')}" placeholder="代号" /></td>
-                            <td><input type="text" class="acc-supplier" value="${escapeHtml(a.supplierCode||'')}" placeholder="供应商代码" /></td>
-                            <td><input type="text" class="acc-name" value="${escapeHtml(a.name)}" placeholder="辅料名称" /></td>
-                            <td><input type="text" class="acc-price" value="${a.price}" placeholder="0.00" /></td>
-                            <td><input type="text" class="acc-qty" value="${a.qty}" placeholder="1" /></td>
-                            <td class="col-total">¥${fmt(total)}</td>
-                            <td class="col-action">
-                                <button class="btn btn-sm btn-info acc-load-lib" data-idx="${idx}">📂库</button>
-                                <button class="btn btn-sm btn-danger remove-acc" data-index="${idx}">✕</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-                tbody.innerHTML = html;
-
-                tbody.querySelectorAll('.acc-code').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].code = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-supplier').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].supplierCode = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-name').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].name = this.value;
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-price').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].price = this.value;
-                        updateAccessoryRows();
-                        updateAll(); }); });
-                tbody.querySelectorAll('.acc-qty').forEach((inp, idx) => { inp.addEventListener('input', function() { accessories[
-                            idx].qty = this.value;
-                        updateAccessoryRows();
-                        updateAll(); }); });
-
-                tbody.querySelectorAll('.remove-acc').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.index, 10);
-                        if (!isNaN(idx)) { accessories.splice(idx, 1);
-                            renderAccessories();
-                            updateAll(); }
-                    });
-                });
-
-                tbody.querySelectorAll('.acc-load-lib').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        const idx = parseInt(this.dataset.idx, 10);
-                        if (isNaN(idx)) return;
-                        if (accessoryLibrary.length === 0) { alert('辅料库为空'); return; }
-                        let list = '可用辅料库（输入序号或代号）：\n';
-                        accessoryLibrary.forEach((item, i) => { list += `${i+1}. 代号:${item.code||'无'} 名称:${item.name}\n`; });
-                        const input = prompt(list + '请输入序号（数字）或辅料代号：');
-                        if (input === null) return;
-                        const trimmed = input.trim();
-                        if (trimmed === '') { alert('输入无效'); return; }
-                        let matched = null;
-                        const num = parseInt(trimmed);
-                        if (!isNaN(num) && num >= 1 && num <= accessoryLibrary.length) { matched =
-                            accessoryLibrary[num - 1]; } else {
-                            matched = accessoryLibrary.find(item => item.code === trimmed);
-                            if (!matched) { alert('未找到匹配的辅料'); return; }
-                        }
-                        const a = accessories[idx];
-                        a.code = matched.code || '';
-                        a.supplierCode = matched.supplier_code || '';
-                        a.name = matched.name || '';
-                        a.price = matched.price || '';
-                        renderAccessories();
-                        updateAll();
-                    });
-                });
-            };
-
-            window.renderAccessories = renderAccessories;
-
+            // ============================================================
             // 启动
+            // ============================================================
             init();
 
         })();
