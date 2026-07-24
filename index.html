@@ -3300,4 +3300,48 @@
                     const ws = XLSX.utils.json_to_sheet(data);
                     const wb = XLSX.utils.book_new();
                     XLSX.utils.book_append_sheet(wb, ws, '辅料库');
-                    ws
+                    ws['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 14 }, { wch: 12 }];
+                    XLSX.writeFile(wb, `辅料库_选中_${new Date().toISOString().slice(0,10)}.xlsx`);
+                });
+
+                document.getElementById('fabricLibSearch').addEventListener('input', applyFabricLibFilters);
+                document.getElementById('fabricExportSupplier').addEventListener('change', applyFabricLibFilters);
+                document.getElementById('fabricTypeFilter').addEventListener('change', applyFabricLibFilters);
+                document.getElementById('fabricCompositionFilter').addEventListener('input', applyFabricLibFilters);
+                document.getElementById('fabricLibClearSearch').addEventListener('click', function() {
+                    document.getElementById('fabricLibSearch').value = '';
+                    applyFabricLibFilters();
+                });
+                document.getElementById('fabricExtraFilterClear').addEventListener('click', function() {
+                    document.getElementById('fabricTypeFilter').value = '';
+                    document.getElementById('fabricCompositionFilter').value = '';
+                    applyFabricLibFilters();
+                });
+
+                document.getElementById('accessoryLibSearch').addEventListener('input', applyAccessoryLibFilters);
+                document.getElementById('accessoryExportSupplier').addEventListener('change', applyAccessoryLibFilters);
+                document.getElementById('accessoryLibClearSearch').addEventListener('click', function() {
+                    document.getElementById('accessoryLibSearch').value = '';
+                    applyAccessoryLibFilters();
+                });
+
+                document.getElementById('fabricSelectAllVisible').addEventListener('click', fabricSelectAllVisible);
+                document.getElementById('fabricDeselectAllVisible').addEventListener('click', fabricDeselectAllVisible);
+                document.getElementById('fabricInvertSelection').addEventListener('click', fabricInvertSelection);
+
+                document.getElementById('accessorySelectAllVisible').addEventListener('click', accessorySelectAllVisible);
+                document.getElementById('accessoryDeselectAllVisible').addEventListener('click',
+                    accessoryDeselectAllVisible);
+                document.getElementById('accessoryInvertSelection').addEventListener('click', accessoryInvertSelection);
+
+                // 启动会话检查 —— ★★★ 修复点1：调用 checkSession ★★★
+                checkSession();
+            }
+
+            // ★★★ 修复点2：调用 init 启动应用 ★★★
+            init();
+
+        })();
+    </script>
+</body>
+</html>
