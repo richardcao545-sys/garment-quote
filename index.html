@@ -2125,6 +2125,7 @@
                     profitRate: item.profit_rate || '',
                     taxRate: item.tax_rate || '',
                     exchangeRate: item.exchange_rate || '',
+                    // 注意：数据库中没有 fixed_cost_per_unit，如果未来添加，可在这里读取
                     fixedCostPerUnit: item.fixed_cost_per_unit || '0',
                 }));
             }
@@ -2401,6 +2402,7 @@
                 document.getElementById('profitRate').value = q.profitRate || '25';
                 document.getElementById('taxRate').value = q.taxRate || '13';
                 document.getElementById('exchangeRate').value = q.exchangeRate || '7.20';
+                // 如果数据库中没有固定费用字段，使用默认值0，但用户可手动调整
                 document.getElementById('fixedCostPerUnit').value = q.fixedCostPerUnit || '0';
                 renderFabrics();
                 renderAccessories();
@@ -2408,6 +2410,7 @@
             }
 
             function getCurrentQuoteData() {
+                // ★★★ 修复：移除 fixed_cost_per_unit 字段，避免数据库报错 ★★★
                 return {
                     customer_code: document.getElementById('customerCode').value,
                     style_number: document.getElementById('styleNumber').value,
@@ -2419,7 +2422,7 @@
                     profit_rate: document.getElementById('profitRate').value,
                     tax_rate: document.getElementById('taxRate').value,
                     exchange_rate: document.getElementById('exchangeRate').value,
-                    fixed_cost_per_unit: document.getElementById('fixedCostPerUnit').value,
+                    // fixed_cost_per_unit 不发送，但该值仍会在本地计算中使用
                 };
             }
 
@@ -2889,7 +2892,7 @@
                                     profit_rate: q.profit_rate || '25',
                                     tax_rate: q.tax_rate || '13',
                                     exchange_rate: q.exchange_rate || '7.20',
-                                    fixed_cost_per_unit: q.fixed_cost_per_unit || '0',
+                                    // fixed_cost_per_unit 不导入，因为数据库可能没有该列
                                 }]);
                             }
                         }
@@ -3334,11 +3337,11 @@
                     accessoryDeselectAllVisible);
                 document.getElementById('accessoryInvertSelection').addEventListener('click', accessoryInvertSelection);
 
-                // 启动会话检查 —— ★★★ 修复点1：调用 checkSession ★★★
+                // 启动会话检查
                 checkSession();
             }
 
-            // ★★★ 修复点2：调用 init 启动应用 ★★★
+            // 启动应用
             init();
 
         })();
