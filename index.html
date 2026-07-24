@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MSA服装报价系统 - 外贸专业版</title>
+    <title>MSA服装报价系统 - 单件核价版</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
@@ -366,6 +366,9 @@
         table tr:last-child td {
             border-bottom: none;
         }
+        table tr:hover td {
+            background: #f6f9fe;
+        }
         table td input,
         table td select {
             width: 100%;
@@ -467,7 +470,7 @@
         }
 
         /* ============================================================
-           报价结果看板 - 双行显示：整批总额 + 单件金额
+           报价结果看板 - 只显示单件金额
            ============================================================ */
         .result-section {
             grid-column: 1 / -1;
@@ -477,8 +480,8 @@
             padding: 24px 28px;
             border: 1px solid #dce8f5;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px 18px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px 16px;
             box-shadow: inset 0 1px 4px rgba(255, 255, 255, 0.8), 0 2px 8px rgba(26, 42, 74, 0.04);
         }
 
@@ -489,7 +492,7 @@
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.4);
             transition: background 0.2s;
-            min-height: 70px;
+            min-height: 60px;
             justify-content: center;
         }
         .result-item:hover {
@@ -505,38 +508,21 @@
             margin-bottom: 2px;
         }
 
-        /* 整批总额 - 大号主值 */
-        .result-item .value-bulk {
+        .result-item .value-unit {
             font-size: 22px;
             font-weight: 700;
             color: #0a1e30;
             letter-spacing: -0.2px;
             line-height: 1.3;
         }
-        .result-item .value-bulk .currency {
+        .result-item .value-unit .currency {
             font-size: 14px;
             font-weight: 600;
             color: #5d7a97;
             margin-right: 2px;
         }
-
-        /* 单件金额 - 辅值，小一号，带/件标识 */
-        .result-item .value-unit {
-            font-size: 15px;
-            font-weight: 500;
-            color: #3a5a7a;
-            letter-spacing: -0.1px;
-            line-height: 1.4;
-            margin-top: 1px;
-        }
-        .result-item .value-unit .currency {
-            font-size: 13px;
-            font-weight: 500;
-            color: #5d7a97;
-            margin-right: 1px;
-        }
         .result-item .value-unit .per-piece {
-            font-size: 12px;
+            font-size: 13px;
             color: #6f859b;
             font-weight: 400;
             margin-left: 2px;
@@ -547,7 +533,7 @@
             background: rgba(26, 42, 74, 0.06);
             border-left: 3px solid #c9a84c;
         }
-        .result-item.highlight-item .value-bulk {
+        .result-item.highlight-item .value-unit {
             font-size: 26px;
             background: linear-gradient(135deg, #1a2a4a, #2c5f8a);
             -webkit-background-clip: text;
@@ -555,10 +541,6 @@
             background-clip: text;
         }
 
-        /* 美金报价特殊样式 */
-        .result-item.usd-item .value-bulk {
-            color: #1a5276;
-        }
         .result-item.usd-item .value-unit {
             color: #1a5276;
         }
@@ -566,16 +548,13 @@
         @media (max-width: 600px) {
             .result-section {
                 grid-template-columns: 1fr 1fr;
-                gap: 8px 12px;
-                padding: 16px 14px;
-            }
-            .result-item .value-bulk {
-                font-size: 18px;
+                gap: 8px 10px;
+                padding: 14px 12px;
             }
             .result-item .value-unit {
-                font-size: 13px;
+                font-size: 18px;
             }
-            .result-item.highlight-item .value-bulk {
+            .result-item.highlight-item .value-unit {
                 font-size: 20px;
             }
         }
@@ -1286,7 +1265,7 @@
     <div id="loginContainer" class="login-container" style="display:none;">
         <div class="logo-icon">🧥</div>
         <h2>MSA 服装报价系统</h2>
-        <p class="subtitle">外贸专业版 · 倒扣利润 · 固定费用分摊</p>
+        <p class="subtitle">单件核价 · 倒扣利润 · 简单高效</p>
         <div class="config-section">
             <label>Supabase URL</label>
             <input type="text" id="supabaseUrl" value="https://cehktltjkiapgnlbctpe.supabase.co" />
@@ -1314,9 +1293,9 @@
     <!-- ========== 主应用容器 ========== -->
     <div id="appContainer" class="container" style="display:none;">
         <div class="header">
-            <h1>🧥 MSA服装报价系统 <span>外贸专业版</span></h1>
+            <h1>🧥 MSA服装报价系统 <span>单件核价</span></h1>
             <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-                <span class="badge"><span class="dot"></span> 倒扣利润 · 固定费用分摊 · 阶梯报价</span>
+                <span class="badge"><span class="dot"></span> 倒扣利润 · 单件核算</span>
                 <div class="user-info">
                     <span class="email" id="userEmailDisplay">user@example.com</span>
                     <button class="btn btn-sm btn-outline" id="logoutBtn">退出</button>
@@ -1331,15 +1310,13 @@
             <div class="form-group"><label>客户代码</label><input type="text" id="customerCode" placeholder="例：C001" value="C001" /></div>
             <div class="form-group"><label>款号</label><input type="text" id="styleNumber" placeholder="例：STYLE-2024" value="STYLE-001" /></div>
 
-            <!-- ===== 固定费用分摊 ===== -->
+            <!-- ===== 大货固定费用（手工输入单件摊销） ===== -->
             <div class="section-block">
                 <div class="section-header">
-                    <div><h3>📦 大货固定费用</h3><span class="sub">小版费、检测费、物流杂费（总额）</span></div>
+                    <div><h3>📦 大货固定费用（单件摊销）</h3><span class="sub">直接输入每件分摊的固定费用金额</span></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>小版费 (元)</label><input type="text" id="sampleFee" placeholder="0" value="500" /></div>
-                    <div class="form-group"><label>检测费 (元)</label><input type="text" id="testFee" placeholder="0" value="300" /></div>
-                    <div class="form-group"><label>物流杂费 (元)</label><input type="text" id="logisticsFee" placeholder="0" value="200" /></div>
+                    <div class="form-group"><label>单件固定费用 <span class="unit">(元/件)</span></label><input type="text" id="fixedCostPerUnit" placeholder="0.00" value="10.00" /></div>
                 </div>
             </div>
 
@@ -1371,7 +1348,7 @@
                         <tbody id="fabricTableBody"></tbody>
                     </table>
                 </div>
-                <div style="text-align:right; font-size:14px; color:#3d5a78; margin-top:4px; font-weight:600;">面料总成本：<strong id="fabricTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
+                <div style="text-align:right; font-size:14px; color:#3d5a78; margin-top:4px; font-weight:600;">面料单件成本合计：<strong id="fabricTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
             </div>
 
             <!-- ===== 辅料明细 ===== -->
@@ -1386,7 +1363,7 @@
                         <tbody id="accessoryTableBody"></tbody>
                     </table>
                 </div>
-                <div style="text-align:right; font-size:14px; color:#3d5a78; margin-top:4px; font-weight:600;">辅料总成本：<strong id="accessoryTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
+                <div style="text-align:right; font-size:14px; color:#3d5a78; margin-top:4px; font-weight:600;">辅料单件成本合计：<strong id="accessoryTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
             </div>
 
             <!-- ===== 工价 + 管理系数 ===== -->
@@ -1403,68 +1380,48 @@
             </div>
 
             <!-- ============================================================
-            报价结果看板 - 双行显示：整批总额 + 单件金额
+            报价结果看板 - 只显示单件金额
             ============================================================ -->
             <div class="result-section">
-                <!-- 面料成本 -->
                 <div class="result-item">
                     <span class="label">🧶 面料成本</span>
-                    <span class="value-bulk" id="fabricCostDisplay">¥0.00</span>
-                    <span class="value-unit" id="fabricCostUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="fabricCostDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 辅料成本 -->
                 <div class="result-item">
                     <span class="label">🧵 辅料成本</span>
-                    <span class="value-bulk" id="accessoryCostDisplay">¥0.00</span>
-                    <span class="value-unit" id="accessoryCostUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="accessoryCostDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 工价 -->
                 <div class="result-item">
                     <span class="label">⚙️ 工价 (含管理)</span>
-                    <span class="value-bulk" id="laborDisplay">¥0.00</span>
-                    <span class="value-unit" id="laborUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="laborDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 固定费用分摊 -->
                 <div class="result-item">
-                    <span class="label">📦 固定费用分摊</span>
-                    <span class="value-bulk" id="fixedCostDisplay">¥0.00</span>
-                    <span class="value-unit" id="fixedCostUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="label">📦 固定费用</span>
+                    <span class="value-unit" id="fixedCostDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 总成本 -->
                 <div class="result-item">
-                    <span class="label">📊 总成本</span>
-                    <span class="value-bulk" id="totalCostDisplay">¥0.00</span>
-                    <span class="value-unit" id="totalCostUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="label">📊 单件总成本</span>
+                    <span class="value-unit" id="totalCostDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 利润（倒扣） -->
                 <div class="result-item">
                     <span class="label">📈 利润 (倒扣)</span>
-                    <span class="value-bulk" id="profitDisplay">¥0.00</span>
-                    <span class="value-unit" id="profitUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="profitDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 报价不含税 -->
                 <div class="result-item">
                     <span class="label">💰 报价 (不含税)</span>
-                    <span class="value-bulk" id="priceExTaxDisplay">¥0.00</span>
-                    <span class="value-unit" id="priceExTaxUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="priceExTaxDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 税额 -->
                 <div class="result-item">
                     <span class="label">🧾 税额</span>
-                    <span class="value-bulk" id="taxDisplay">¥0.00</span>
-                    <span class="value-unit" id="taxUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="taxDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 报价含税（高亮） -->
                 <div class="result-item highlight-item">
                     <span class="label">🏷️ 报价 (含税)</span>
-                    <span class="value-bulk" id="priceIncTaxDisplay">¥0.00</span>
-                    <span class="value-unit" id="priceIncTaxUnitDisplay">¥0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="priceIncTaxDisplay">¥0.00 <span class="per-piece">/件</span></span>
                 </div>
-                <!-- 美金报价 -->
                 <div class="result-item usd-item">
                     <span class="label">💵 美金报价 (USD)</span>
-                    <span class="value-bulk" id="usdPriceDisplay">$0.00</span>
-                    <span class="value-unit" id="usdPriceUnitDisplay">$0.00 <span class="per-piece">/件</span></span>
+                    <span class="value-unit" id="usdPriceDisplay">$0.00 <span class="per-piece">/件</span></span>
                 </div>
             </div>
 
@@ -1655,7 +1612,7 @@
             }
 
             // ============================================================
-            // 4. 计算逻辑
+            // 4. 计算逻辑 - 只计算单件价格
             // ============================================================
             function calcFabric(fabric) {
                 const type = fabric.type || '针织';
@@ -1686,123 +1643,95 @@
             }
 
             function computeQuote(quote) {
-                const qty = parseInput(quote.quantity);
                 const labor = parseInput(quote.laborCost);
                 const factor = parseInput(quote.laborFactor);
                 const profitPct = parseInput(quote.profitRate) / 100;
                 const taxPct = parseInput(quote.taxRate) / 100;
                 const rate = parseInput(quote.exchangeRate);
 
-                const sampleFee = parseInput(quote.sampleFee) || 0;
-                const testFee = parseInput(quote.testFee) || 0;
-                const logisticsFee = parseInput(quote.logisticsFee) || 0;
-                const totalFixed = sampleFee + testFee + logisticsFee;
-                const fixedPerUnit = qty > 0 ? totalFixed / qty : 0;
+                // 固定费用（单件，直接手工输入）
+                const fixedPerUnit = parseInput(quote.fixedCostPerUnit) || 0;
 
+                // 面料单件成本合计
                 let fabricUnitTotal = 0;
                 (quote.fabrics || []).forEach(f => { const { cost } = calcFabric(f);
                     fabricUnitTotal += cost; });
-                const fabricTotal = fabricUnitTotal * qty;
 
+                // 辅料单件成本合计
                 let accessoryUnitTotal = 0;
                 (quote.accessories || []).forEach(a => { accessoryUnitTotal += parseInput(a.price) * parseInput(a.qty); });
-                const accessoryTotal = accessoryUnitTotal * qty;
 
+                // 工价（含管理）
                 const effectiveLabor = labor * factor;
-                const laborTotal = effectiveLabor * qty;
 
-                const totalCost = fabricTotal + accessoryTotal + laborTotal + totalFixed;
+                // 单件总成本 = 面料 + 辅料 + 工价 + 固定费用
+                const unitTotalCost = fabricUnitTotal + accessoryUnitTotal + effectiveLabor + fixedPerUnit;
 
-                // 倒扣利润
-                const priceExTax = totalCost / (1 - profitPct);
-                const profit = priceExTax - totalCost;
+                // 倒扣利润：报价(不含税) = 单件总成本 / (1 - 利润率)
+                const unitPriceExTax = unitTotalCost / (1 - profitPct);
+                const unitProfit = unitPriceExTax - unitTotalCost;
 
-                const taxAmount = priceExTax * taxPct;
-                const priceIncTax = priceExTax + taxAmount;
-                const unitPrice = qty > 0 ? priceIncTax / qty : 0;
-                const usdPrice = rate > 0 ? priceIncTax / rate : 0;
-                const usdPriceTotal = usdPrice * qty;
+                const unitTax = unitPriceExTax * taxPct;
+                const unitPriceIncTax = unitPriceExTax + unitTax;
+                const usdPrice = rate > 0 ? unitPriceIncTax / rate : 0;
 
                 return {
-                    fabricTotal,
-                    accessoryTotal,
-                    laborTotal,
-                    fixedTotal: totalFixed,
-                    fixedPerUnit,
-                    totalCost,
-                    profit,
-                    profitUnit: profit / (qty || 1),
-                    priceExTax,
-                    priceExTaxUnit: priceExTax / (qty || 1),
-                    taxAmount,
-                    taxUnit: taxAmount / (qty || 1),
-                    priceIncTax,
-                    unitPrice,
-                    usdPrice,
-                    usdPriceTotal,
                     fabricUnitTotal,
                     accessoryUnitTotal,
-                    effectiveLabor,
                     laborUnit: effectiveLabor,
-                    qty: qty,
+                    fixedPerUnit,
+                    unitTotalCost,
+                    unitProfit,
+                    unitPriceExTax,
+                    unitTax,
+                    unitPriceIncTax,
+                    usdPrice,
                 };
             }
 
             // ============================================================
-            // 5. 核心更新函数 - 双行显示（整批总额 + 单件金额）
+            // 5. 核心更新函数 - 只显示单件价格
             // ============================================================
             function updateAll() {
                 updateFabricRows();
                 updateAccessoryRows();
 
                 const quote = {
-                    quantity: document.getElementById('quantity').value,
                     laborCost: document.getElementById('laborCost').value,
                     laborFactor: document.getElementById('laborFactor').value,
                     profitRate: document.getElementById('profitRate').value,
                     taxRate: document.getElementById('taxRate').value,
                     exchangeRate: document.getElementById('exchangeRate').value,
-                    sampleFee: document.getElementById('sampleFee').value,
-                    testFee: document.getElementById('testFee').value,
-                    logisticsFee: document.getElementById('logisticsFee').value,
+                    fixedCostPerUnit: document.getElementById('fixedCostPerUnit').value,
                     fabrics: fabrics,
                     accessories: accessories,
                 };
                 const result = computeQuote(quote);
 
-                // ---- 整批总额 ----
-                document.getElementById('fabricCostDisplay').textContent = `¥${fmt(result.fabricTotal)}`;
-                document.getElementById('accessoryCostDisplay').textContent = `¥${fmt(result.accessoryTotal)}`;
-                document.getElementById('laborDisplay').textContent = `¥${fmt(result.laborTotal)}`;
-                document.getElementById('fixedCostDisplay').textContent = `¥${fmt(result.fixedTotal)}`;
-                document.getElementById('totalCostDisplay').textContent = `¥${fmt(result.totalCost)}`;
-                document.getElementById('profitDisplay').textContent = `¥${fmt(result.profit)}`;
-                document.getElementById('priceExTaxDisplay').textContent = `¥${fmt(result.priceExTax)}`;
-                document.getElementById('taxDisplay').textContent = `¥${fmt(result.taxAmount)}`;
-                document.getElementById('priceIncTaxDisplay').textContent = `¥${fmt(result.priceIncTax)}`;
-                document.getElementById('usdPriceDisplay').textContent = `$${fmt(result.usdPriceTotal)}`;
+                // 更新表格上方的合计显示
+                document.getElementById('fabricTotalDisplay').textContent = `¥${fmt(result.fabricUnitTotal)}`;
+                document.getElementById('accessoryTotalDisplay').textContent = `¥${fmt(result.accessoryUnitTotal)}`;
 
-                // ---- 单件金额（/件） ----
-                const qty = result.qty || 1;
-                document.getElementById('fabricCostUnitDisplay').innerHTML =
-                    `¥${fmt(result.fabricTotal / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('accessoryCostUnitDisplay').innerHTML =
-                    `¥${fmt(result.accessoryTotal / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('laborUnitDisplay').innerHTML =
+                // 更新报价看板
+                document.getElementById('fabricCostDisplay').innerHTML =
+                    `¥${fmt(result.fabricUnitTotal)} <span class="per-piece">/件</span>`;
+                document.getElementById('accessoryCostDisplay').innerHTML =
+                    `¥${fmt(result.accessoryUnitTotal)} <span class="per-piece">/件</span>`;
+                document.getElementById('laborDisplay').innerHTML =
                     `¥${fmt(result.laborUnit)} <span class="per-piece">/件</span>`;
-                document.getElementById('fixedCostUnitDisplay').innerHTML =
+                document.getElementById('fixedCostDisplay').innerHTML =
                     `¥${fmt(result.fixedPerUnit)} <span class="per-piece">/件</span>`;
-                document.getElementById('totalCostUnitDisplay').innerHTML =
-                    `¥${fmt(result.totalCost / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('profitUnitDisplay').innerHTML =
-                    `¥${fmt(result.profit / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('priceExTaxUnitDisplay').innerHTML =
-                    `¥${fmt(result.priceExTax / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('taxUnitDisplay').innerHTML =
-                    `¥${fmt(result.taxAmount / qty)} <span class="per-piece">/件</span>`;
-                document.getElementById('priceIncTaxUnitDisplay').innerHTML =
-                    `¥${fmt(result.unitPrice)} <span class="per-piece">/件</span>`;
-                document.getElementById('usdPriceUnitDisplay').innerHTML =
+                document.getElementById('totalCostDisplay').innerHTML =
+                    `¥${fmt(result.unitTotalCost)} <span class="per-piece">/件</span>`;
+                document.getElementById('profitDisplay').innerHTML =
+                    `¥${fmt(result.unitProfit)} <span class="per-piece">/件</span>`;
+                document.getElementById('priceExTaxDisplay').innerHTML =
+                    `¥${fmt(result.unitPriceExTax)} <span class="per-piece">/件</span>`;
+                document.getElementById('taxDisplay').innerHTML =
+                    `¥${fmt(result.unitTax)} <span class="per-piece">/件</span>`;
+                document.getElementById('priceIncTaxDisplay').innerHTML =
+                    `¥${fmt(result.unitPriceIncTax)} <span class="per-piece">/件</span>`;
+                document.getElementById('usdPriceDisplay').innerHTML =
                     `$${fmt(result.usdPrice)} <span class="per-piece">/件</span>`;
             }
 
@@ -2054,8 +1983,8 @@
             // ============================================================
             function bindMainInputs() {
                 const mainInputs = [
-                    'quantity', 'laborCost', 'laborFactor', 'profitRate', 'taxRate', 'exchangeRate',
-                    'sampleFee', 'testFee', 'logisticsFee'
+                    'laborCost', 'laborFactor', 'profitRate', 'taxRate', 'exchangeRate',
+                    'fixedCostPerUnit'
                 ];
                 mainInputs.forEach(id => {
                     const el = document.getElementById(id);
@@ -2064,7 +1993,7 @@
                         el.addEventListener('change', updateAll);
                     }
                 });
-                ['styleName', 'customerCode', 'styleNumber'].forEach(id => {
+                ['styleName', 'customerCode', 'styleNumber', 'quantity'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.addEventListener('input', updateAll);
                 });
@@ -2197,9 +2126,7 @@
                     profitRate: item.profit_rate || '',
                     taxRate: item.tax_rate || '',
                     exchangeRate: item.exchange_rate || '',
-                    sampleFee: item.sample_fee || '0',
-                    testFee: item.test_fee || '0',
-                    logisticsFee: item.logistics_fee || '0',
+                    fixedCostPerUnit: item.fixed_cost_per_unit || '0',
                     created_at: item.created_at,
                 }));
             }
@@ -2424,9 +2351,9 @@
                             <td>${escapeHtml(q.styleNumber || '')}</td>
                             <td>${escapeHtml(q.styleName || '未命名')}</td>
                             <td>${q.quantity}</td>
-                            <td>¥${fmt(result.totalCost)}</td>
-                            <td>¥${fmt(result.priceIncTax)}</td>
-                            <td>¥${fmt(result.unitPrice)}</td>
+                            <td>¥${fmt(result.unitTotalCost)}</td>
+                            <td>¥${fmt(result.unitPriceIncTax)}</td>
+                            <td>¥${fmt(result.unitPriceIncTax)}</td>
                             <td>$${fmt(result.usdPrice)}</td>
                             <td class="col-actions">
                                 <button class="btn btn-sm btn-outline load-quote" data-id="${q.id}">📂 加载</button>
@@ -2479,9 +2406,7 @@
                 document.getElementById('profitRate').value = q.profitRate || '25';
                 document.getElementById('taxRate').value = q.taxRate || '13';
                 document.getElementById('exchangeRate').value = q.exchangeRate || '7.20';
-                document.getElementById('sampleFee').value = q.sampleFee || '0';
-                document.getElementById('testFee').value = q.testFee || '0';
-                document.getElementById('logisticsFee').value = q.logisticsFee || '0';
+                document.getElementById('fixedCostPerUnit').value = q.fixedCostPerUnit || '0';
                 renderFabrics();
                 renderAccessories();
                 updateAll();
@@ -2500,9 +2425,7 @@
                     profit_rate: document.getElementById('profitRate').value,
                     tax_rate: document.getElementById('taxRate').value,
                     exchange_rate: document.getElementById('exchangeRate').value,
-                    sample_fee: document.getElementById('sampleFee').value,
-                    test_fee: document.getElementById('testFee').value,
-                    logistics_fee: document.getElementById('logisticsFee').value,
+                    fixed_cost_per_unit: document.getElementById('fixedCostPerUnit').value,
                 };
             }
 
@@ -2624,58 +2547,53 @@
 
                 const wb = XLSX.utils.book_new();
 
-                // 汇总表
                 const summaryRows = [
-                    ['多款式报价汇总表（外贸倒扣利润）'],
+                    ['多款式报价汇总表（单件核价）'],
                     ['生成日期', new Date().toLocaleString()],
                     [],
-                    ['序号', '客户代码', '款号', '款式名称', '数量', '总成本(¥)', '含税报价(¥)', '单件含税价(¥)', '美金价(USD)']
+                    ['序号', '客户代码', '款号', '款式名称', '数量', '单件总成本(¥)', '单件含税价(¥)', '美金价(USD)']
                 ];
                 selectedQuotes.forEach((q, idx) => {
                     const result = computeQuote(q);
                     summaryRows.push([idx + 1, q.customerCode || '', q.styleNumber || '', q.styleName || '', q
                         .quantity,
-                        result.totalCost, result.priceIncTax, result.unitPrice, result.usdPrice
+                        result.unitTotalCost, result.unitPriceIncTax, result.usdPrice
                     ]);
                 });
                 const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
                 wsSummary['!cols'] = [{ wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 20 }, { wch: 12 }, { wch: 14 }, { wch: 14 },
-                    { wch: 14 }, { wch: 14 }
+                    { wch: 14 }
                 ];
                 XLSX.utils.book_append_sheet(wb, wsSummary, '汇总对比');
 
-                // 每个款式单独sheet
                 selectedQuotes.forEach((q, idx) => {
                     const sheetName = (q.styleName || '款式' + (idx + 1)).slice(0, 31);
                     const result = computeQuote(q);
                     const infoRows = [
-                        ['款式报价明细（倒扣利润）'],
+                        ['款式报价明细（单件核价）'],
                         ['客户代码', q.customerCode || ''],
                         ['款号', q.styleNumber || ''],
                         ['款式名称', q.styleName],
                         ['数量', q.quantity],
                         ['工价（元/件）', q.laborCost],
                         ['管理系数', q.laborFactor],
-                        ['有效工价（元/件）', result.effectiveLabor],
-                        ['小版费', q.sampleFee || '0'],
-                        ['检测费', q.testFee || '0'],
-                        ['物流杂费', q.logisticsFee || '0'],
-                        ['固定费用分摊（元/件）', result.fixedPerUnit],
+                        ['有效工价（元/件）', result.laborUnit],
+                        ['单件固定费用（元/件）', result.fixedPerUnit],
                         ['利润率（%）', q.profitRate],
                         ['税率（%）', q.taxRate],
                         ['汇率（USD/CNY）', q.exchangeRate],
                         [],
-                        ['成本项', '整批总额（元）', '单件金额（元）'],
-                        ['面料总成本', result.fabricTotal, result.fabricTotal / result.qty],
-                        ['辅料总成本', result.accessoryTotal, result.accessoryTotal / result.qty],
-                        ['工价合计', result.laborTotal, result.laborUnit],
-                        ['固定费用合计', result.fixedTotal, result.fixedPerUnit],
-                        ['总成本', result.totalCost, result.totalCost / result.qty],
-                        ['利润（倒扣）', result.profit, result.profit / result.qty],
-                        ['报价（不含税）', result.priceExTax, result.priceExTax / result.qty],
-                        ['税额', result.taxAmount, result.taxAmount / result.qty],
-                        ['报价（含税）', result.priceIncTax, result.unitPrice],
-                        ['美金报价（USD）', result.usdPriceTotal, result.usdPrice],
+                        ['成本项', '单件金额（元）'],
+                        ['面料成本', result.fabricUnitTotal],
+                        ['辅料成本', result.accessoryUnitTotal],
+                        ['工价（含管理）', result.laborUnit],
+                        ['固定费用', result.fixedPerUnit],
+                        ['单件总成本', result.unitTotalCost],
+                        ['利润（倒扣）', result.unitProfit],
+                        ['报价（不含税）', result.unitPriceExTax],
+                        ['税额', result.unitTax],
+                        ['报价（含税）', result.unitPriceIncTax],
+                        ['美金报价（USD）', result.usdPrice],
                     ];
                     const fabricRows = [
                         ['面料明细'],
@@ -2720,7 +2638,7 @@
                     XLSX.utils.book_append_sheet(wb, ws, sheetName);
                 });
 
-                XLSX.writeFile(wb, `多款式报价_外贸_${new Date().toISOString().slice(0,10)}.xlsx`);
+                XLSX.writeFile(wb, `多款式报价_单件核价_${new Date().toISOString().slice(0,10)}.xlsx`);
             }
 
             // ============================================================
@@ -2921,9 +2839,7 @@
                         profitRate: document.getElementById('profitRate').value,
                         taxRate: document.getElementById('taxRate').value,
                         exchangeRate: document.getElementById('exchangeRate').value,
-                        sampleFee: document.getElementById('sampleFee').value,
-                        testFee: document.getElementById('testFee').value,
-                        logisticsFee: document.getElementById('logisticsFee').value,
+                        fixedCostPerUnit: document.getElementById('fixedCostPerUnit').value,
                     },
                     fabricLibrary: fabricLibrary,
                     accessoryLibrary: accessoryLibrary,
@@ -2987,9 +2903,7 @@
                                     profit_rate: q.profit_rate || '25',
                                     tax_rate: q.tax_rate || '13',
                                     exchange_rate: q.exchange_rate || '7.20',
-                                    sample_fee: q.sample_fee || '0',
-                                    test_fee: q.test_fee || '0',
-                                    logistics_fee: q.logistics_fee || '0',
+                                    fixed_cost_per_unit: q.fixed_cost_per_unit || '0',
                                 }]);
                             }
                         }
@@ -3016,9 +2930,7 @@
                 document.getElementById('profitRate').value = '25';
                 document.getElementById('taxRate').value = '13';
                 document.getElementById('exchangeRate').value = '7.20';
-                document.getElementById('sampleFee').value = '500';
-                document.getElementById('testFee').value = '300';
-                document.getElementById('logisticsFee').value = '200';
+                document.getElementById('fixedCostPerUnit').value = '10.00';
 
                 fabrics = [
                     { code: 'F-001', supplierCode: 'SUP-01', name: '棉布', type: '针织', width: '1.5', weight: '200',
