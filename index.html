@@ -2526,109 +2526,57 @@
             // ============================================================
             // 12. 导出
             // ============================================================
-            function exportSelectedQuotes() {
-                const visibleRows = document.querySelectorAll('#quoteListBody tr:not([style*="display: none"])');
-                const selectedIds = [];
-                visibleRows.forEach(row => {
-                    const cb = row.querySelector('.quote-checkbox');
-                    if (cb && cb.checked) {
-                        const id = cb.dataset.id;
-                        if (id) selectedIds.push(id);
-                    }
-                });
-                if (selectedIds.length === 0) { alert('请至少选择一个款式'); return; }
-                const selectedQuotes = quoteList.filter(q => selectedIds.includes(q.id));
+function exportSelectedQuotes() {
+    const visibleRows = document.querySelectorAll('#quoteListBody tr:not([style*="display: none"])');
+    const selectedIds = [];
+    visibleRows.forEach(row => {
+        const cb = row.querySelector('.quote-checkbox');
+        if (cb && cb.checked) {
+            const id = cb.dataset.id;
+            if (id) selectedIds.push(id);
+        }
+    });
+    if (selectedIds.length === 0) { alert('请至少选择一个款式'); return; }
+    const selectedQuotes = quoteList.filter(q => selectedIds.includes(q.id));
 
-                const wb = XLSX.utils.book_new();
+    // 构建汇总数据
+    const rows = [
+        ['款式报价汇总（单件核价）'],
+        ['生成日期', new Date().toLocaleString()],
+        [],
+        ['序号', '客户', '款号', '款式名称', '面料成本', '辅料成本', '工价（含管理）', '固定费用', '总成本', '利润（倒扣）', '不含税价', '税额', '含税报价', '美金价']
+    ];
+    selectedQuotes.forEach((q, idx) => {
+        const result = computeQuote(q);
+        rows.push([
+            idx + 1,
+            q.customerCode || '',
+            q.styleNumber || '',
+            q.styleName || '',
+            result.fabricUnitTotal,
+            result.accessoryUnitTotal,
+            result.laborUnit,
+            result.fixedPerUnit,
+            result.unitTotalCost,
+            result.unitProfit,
+            result.unitPriceExTax,
+            result.unitTax,
+            result.unitPriceIncTax,
+            result.usdPrice
+        ]);
+    });
 
-                const summaryRows = [
-                    ['多款式报价汇总表（单件核价）'],
-                    ['生成日期', new Date().toLocaleString()],
-                    [],
-                    ['序号', '客户', '款号', '款式名称', '单件总成本', '含税价', '美金价']
-                ];
-                selectedQuotes.forEach((q, idx) => {
-                    const result = computeQuote(q);
-                    summaryRows.push([idx + 1, q.customerCode || '', q.styleNumber || '', q.styleName || '',
-                        result.unitTotalCost, result.unitPriceIncTax, result.usdPrice
-                    ]);
-                });
-                const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
-                wsSummary['!cols'] = [{ wch: 6 }, { wch: 12 }, { wch: 14 }, { wch: 20 }, { wch: 14 }, { wch: 14 }, { wch: 14 }];
-                XLSX.utils.book_append_sheet(wb, wsSummary, '汇总对比');
-
-                selectedQuotes.forEach((q, idx) => {
-                    const sheetName = (q.styleName || '款式' + (idx + 1)).slice(0, 31);
-                    const result = computeQuote(q);
-                    const infoRows = [
-                        ['款式报价明细（单件核价）'],
-                        ['客户', q.customerCode || ''],
-                        ['款号', q.styleNumber || ''],
-                        ['款式名称', q.styleName],
-                        ['工价（元/件）', q.laborCost],
-                        ['管理系数', q.laborFactor],
-                        ['有效工价', result.laborUnit],
-                        ['单件固定费用', result.fixedPerUnit],
-                        ['利润率（%）', q.profitRate],
-                        ['税率（%）', q.taxRate],
-                        ['汇率', q.exchangeRate],
-                        [],
-                        ['成本项', '单件金额（元）'],
-                        ['面料成本', result.fabricUnitTotal],
-                        ['辅料成本', result.accessoryUnitTotal],
-                        ['工价（含管理）', result.laborUnit],
-                        ['固定费用', result.fixedPerUnit],
-                        ['单件总成本', result.unitTotalCost],
-                        ['利润（倒扣）', result.unitProfit],
-                        ['报价（不含税）', result.unitPriceExTax],
-                        ['税额', result.unitTax],
-                        ['报价（含税）', result.unitPriceIncTax],
-                        ['美金报价（USD）', result.usdPrice],
-                    ];
-                    const fabricRows = [
-                        ['面料明细'],
-                        ['代号', '供应商', '名称', '类型', '门幅', '克重', '单价', '用料', '损耗%', '缩水%', '实际用料', '单件成本']
-                    ];
-                    (q.fabrics || []).forEach(f => {
-                        const { actualUsage, cost } = calcFabric(f);
-                        const type = f.type || '针织';
-                        if (type === '梭织') {
-                            fabricRows.push([f.code || '', f.supplierCode || '', f.name, type, f.width || '-', f
-                                .weight || '-',
-                                f.pricePerKg, f.usage, f.lossPercent, f.shrinkPercent || '', actualUsage, cost
-                            ]);
-                        } else {
-                            fabricRows.push([f.code || '', f.supplierCode || '', f.name, type, f.width || '-', f
-                                .weight || '-',
-                                f.pricePerKg, f.usage, f.lossPercent, '-', actualUsage, cost
-                            ]);
-                        }
-                    });
-                    fabricRows.push(['合计', '', '', '', '', '', '', '', '', '', '', result.fabricUnitTotal]);
-
-                    const accRows = [
-                        ['辅料明细'],
-                        ['代号', '供应商', '名称', '单价', '用量', '小计']
-                    ];
-                    let accSum = 0;
-                    (q.accessories || []).forEach(a => {
-                        const total = parseInput(a.price) * parseInput(a.qty);
-                        accSum += total;
-                        accRows.push([a.code || '', a.supplierCode || '', a.name, a.price, a.qty, total]);
-                    });
-                    accRows.push(['合计', '', '', '', '', accSum]);
-
-                    const allRows = [...infoRows, [], ...fabricRows, [], ...accRows];
-                    const ws = XLSX.utils.aoa_to_sheet(allRows);
-                    ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 12 }, { wch: 10 }, { wch: 8 }, { wch: 8 }, { wch: 10 },
-                        { wch: 10 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 10 }
-                    ];
-                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
-                });
-
-                XLSX.writeFile(wb, `多款式报价_单件核价_${new Date().toISOString().slice(0,10)}.xlsx`);
-            }
-
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [
+        { wch: 6 }, { wch: 12 }, { wch: 14 }, { wch: 20 },
+        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+        { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+        { wch: 12 }, { wch: 12 }
+    ];
+    XLSX.utils.book_append_sheet(wb, ws, '汇总对比');
+    XLSX.writeFile(wb, `多款式报价汇总_${new Date().toISOString().slice(0,10)}.xlsx`);
+}
             // ============================================================
             // 13. 全选/反选
             // ============================================================
