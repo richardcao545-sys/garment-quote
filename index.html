@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js">
     </script>
     <style>
-        /* ========== 全局 ========== */
+        /* ===== 全局 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -17,47 +17,36 @@
         }
         body {
             font-family: 'Calibri', 'Segoe UI', Roboto, Arial, sans-serif;
-            background: #e8ecf2;
+            background: #eef2f7;
             color: #1a1a2e;
-            padding: 30px 20px;
+            padding: 24px 20px;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: flex-start;
         }
         .container {
-            max-width: 1500px;
+            max-width: 1400px;
             width: 100%;
             background: #ffffff;
-            border-radius: 28px;
-            box-shadow: 0 20px 60px rgba(26, 42, 74, 0.08), 0 8px 24px rgba(26, 42, 74, 0.04);
-            padding: 36px 44px 44px;
-            transition: all 0.2s;
+            border-radius: 20px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+            padding: 28px 32px 32px;
         }
+
+        /* ===== 头部 ===== */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            margin-bottom: 28px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #eef1f7;
-            position: relative;
-        }
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 80px;
-            height: 3px;
-            background: linear-gradient(90deg, #c9a84c, #e8d5a3);
-            border-radius: 4px;
+            margin-bottom: 22px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #eef2f7;
         }
         .header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: -0.3px;
             color: #1a2a4a;
             display: flex;
             align-items: center;
@@ -65,7 +54,7 @@
         }
         .header h1 span {
             background: linear-gradient(135deg, #c9a84c, #b8923a);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #fff;
             padding: 2px 14px;
@@ -74,34 +63,11 @@
         }
         .header .badge {
             font-size: 12px;
-            font-weight: 500;
             color: #4a6a8b;
             background: #eef4fa;
             padding: 4px 16px;
             border-radius: 40px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
             border: 1px solid #dce6f0;
-        }
-        .header .badge .dot {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            background: #2ecc71;
-            border-radius: 50%;
-            animation: pulse-dot 2s infinite;
-        }
-        @keyframes pulse-dot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.6;
-                transform: scale(0.85);
-            }
         }
         .user-info {
             font-size: 13px;
@@ -110,130 +76,13 @@
             align-items: center;
             gap: 12px;
         }
-        .user-info .email {
-            font-weight: 500;
-        }
         .user-info .btn {
             padding: 4px 16px;
             font-size: 12px;
             border-radius: 30px;
         }
-        .module-bg-light {
-            background: #f7f9fc;
-            border-radius: 16px;
-            padding: 16px 18px;
-            border: 1px solid #eef2f7;
-        }
-        .module-bg-mid {
-            background: #f0f4fa;
-            border-radius: 16px;
-            padding: 16px 18px;
-            border: 1px solid #e8edf5;
-        }
-        .module-bg-warm {
-            background: #faf7f0;
-            border-radius: 16px;
-            padding: 16px 18px;
-            border: 1px solid #f0ebe0;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px 28px;
-        }
-        @media (max-width: 820px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-                gap: 14px;
-            }
-            .container {
-                padding: 18px 14px;
-            }
-            .header h1 {
-                font-size: 20px;
-            }
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-        .form-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2c3f5a;
-            letter-spacing: 0.2px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .form-group label .unit {
-            font-weight: 400;
-            color: #8a9aa8;
-            font-size: 11px;
-        }
-        .form-group input,
-        .form-group select {
-            padding: 8px 12px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 400;
-            color: #1a1a2e;
-            background: #ffffff;
-            transition: border 0.25s, box-shadow 0.25s;
-            width: 100%;
-            outline: none;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-        }
-        .form-group input:focus,
-        .form-group select:focus {
-            border-color: #2c5f8a;
-            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.08);
-            background: #ffffff;
-        }
-        .form-group input::placeholder {
-            color: #b5c4d2;
-            font-weight: 300;
-        }
-        .form-row {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-        }
-        .form-row .form-group {
-            flex: 1;
-            min-width: 100px;
-        }
-        .section-block {
-            grid-column: 1 / -1;
-            margin-top: 6px;
-        }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .section-header h3 {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1a2a4a;
-            letter-spacing: -0.2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .section-header h3 .icon {
-            font-size: 18px;
-        }
-        .section-header .sub {
-            font-size: 12px;
-            color: #6f859b;
-            font-weight: 400;
-        }
+
+        /* ===== 按钮 ===== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -248,53 +97,31 @@
             transition: all 0.2s ease;
             background: #eef3f9;
             color: #1f3a57;
-            text-decoration: none;
             font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            letter-spacing: 0.2px;
         }
         .btn:hover {
             background: #e2eaf4;
             transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-        }
-        .btn:active {
-            transform: scale(0.96);
         }
         .btn-primary {
             background: linear-gradient(135deg, #1a2a4a, #2c5f8a);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(26, 42, 74, 0.18);
+            box-shadow: 0 4px 12px rgba(26, 42, 74, 0.15);
         }
         .btn-primary:hover {
-            box-shadow: 0 6px 20px rgba(26, 42, 74, 0.28);
-            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(26, 42, 74, 0.25);
         }
         .btn-success {
             background: linear-gradient(135deg, #1e7e34, #27ae60);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(30, 126, 52, 0.18);
-        }
-        .btn-success:hover {
-            box-shadow: 0 6px 20px rgba(30, 126, 52, 0.28);
-            transform: translateY(-1px);
         }
         .btn-danger {
             background: linear-gradient(135deg, #c0392b, #e74c3c);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.16);
-        }
-        .btn-danger:hover {
-            box-shadow: 0 6px 20px rgba(192, 57, 43, 0.26);
-            transform: translateY(-1px);
         }
         .btn-info {
             background: linear-gradient(135deg, #1a5276, #2e86c1);
             color: #fff;
-            box-shadow: 0 4px 12px rgba(26, 82, 118, 0.16);
-        }
-        .btn-info:hover {
-            box-shadow: 0 6px 20px rgba(26, 82, 118, 0.26);
-            transform: translateY(-1px);
         }
         .btn-outline {
             background: transparent;
@@ -304,25 +131,161 @@
         .btn-outline:hover {
             background: #f0f4fa;
             border-color: #a0b4cc;
-            transform: translateY(-1px);
         }
         .btn-sm {
             padding: 4px 12px;
             font-size: 11px;
             border-radius: 30px;
         }
+
+        /* ================================================================
+           卡片式分组布局 —— 类似图片风格
+           ================================================================ */
+        .param-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 24px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 820px) {
+            .param-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+            .container {
+                padding: 16px 14px;
+            }
+            .header h1 {
+                font-size: 18px;
+            }
+        }
+
+        /* 卡片 */
+        .card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 16px 20px 18px;
+            border: 1px solid #e9edf4;
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+        }
+        .card .card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3f5a;
+            letter-spacing: 0.3px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card .card-title .icon {
+            font-size: 16px;
+        }
+        .card .card-title .sub {
+            font-weight: 400;
+            color: #8a9aa8;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        /* 字段行 — 类似图片中的横向排列 */
+        .field-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 22px;
+            align-items: center;
+        }
+        .field-row .field-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            flex: 0 1 auto;
+            min-width: 100px;
+        }
+        .field-row .field-item label {
+            font-weight: 600;
+            color: #3d5a78;
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        .field-row .field-item input,
+        .field-row .field-item select {
+            padding: 5px 10px;
+            border: 1.5px solid #dce3ec;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #ffffff;
+            outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            transition: border 0.2s;
+            width: 110px;
+        }
+        .field-row .field-item input:focus,
+        .field-row .field-item select:focus {
+            border-color: #2c5f8a;
+            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.06);
+        }
+        .field-row .field-item input[style*="width:"] {
+            width: auto;
+        }
+        .field-row .field-item .unit {
+            color: #8a9aa8;
+            font-size: 11px;
+            font-weight: 400;
+        }
+
+        /* 特殊：款式名称、客户代码等宽一些 */
+        .field-item.wide input {
+            width: 160px;
+        }
+        .field-item.medium input {
+            width: 130px;
+        }
+
+        /* ===== 面料 / 辅料 表格区域 ===== */
+        .section-block {
+            margin-top: 14px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .section-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a2a4a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-header h3 .icon {
+            font-size: 16px;
+        }
+        .section-header .sub {
+            font-size: 11px;
+            color: #6f859b;
+            font-weight: 400;
+        }
+
         .table-wrap {
             overflow-x: auto;
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid #e6edf6;
             background: #ffffff;
-            margin-bottom: 6px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 12px;
-            min-width: 1100px;
+            min-width: 1000px;
         }
         table th {
             background: #f0f5fb;
@@ -331,16 +294,15 @@
             font-size: 10px;
             letter-spacing: 0.4px;
             text-transform: uppercase;
-            padding: 10px 10px;
+            padding: 8px 10px;
             text-align: left;
             border-bottom: 1.5px solid #dce3ec;
         }
         table td {
-            padding: 6px 10px;
+            padding: 5px 10px;
             border-bottom: 1px solid #eef2f8;
             vertical-align: middle;
             background: #ffffff;
-            transition: background 0.15s;
         }
         table tr:last-child td {
             border-bottom: none;
@@ -351,147 +313,124 @@
         table td input,
         table td select {
             width: 100%;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border: 1.5px solid #e2e8f0;
             border-radius: 6px;
             font-size: 12px;
             background: #ffffff;
-            transition: border 0.2s, box-shadow 0.2s;
             outline: none;
             font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            transition: border 0.2s;
         }
         table td input:focus,
         table td select:focus {
             border-color: #2c5f8a;
-            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.06);
+            box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.05);
         }
-        table td select {
-            appearance: auto;
-            background: #fff;
-        }
-        table td input:disabled,
-        table td select:disabled {
+        table td input:disabled {
             background: #f2f5f9;
             color: #7a8a9a;
             cursor: not-allowed;
             opacity: 0.7;
         }
-        table td .btn {
-            padding: 3px 10px;
-            font-size: 11px;
-            border-radius: 20px;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .col-checkbox {
-            width: 34px;
-            text-align: center;
-        }
-        .col-checkbox input[type="checkbox"] {
-            width: 15px;
-            height: 15px;
-            cursor: pointer;
-            accent-color: #1a2a4a;
-        }
         .col-code {
-            min-width: 65px;
-        }
-        .col-supplier {
-            min-width: 65px;
-        }
-        .col-name {
-            min-width: 80px;
-        }
-        .col-type {
             min-width: 60px;
         }
-        .col-width {
+        .col-supplier {
+            min-width: 60px;
+        }
+        .col-name {
+            min-width: 70px;
+        }
+        .col-type {
             min-width: 55px;
+        }
+        .col-width {
+            min-width: 50px;
         }
         .col-weight {
-            min-width: 55px;
+            min-width: 50px;
         }
         .col-price {
-            min-width: 65px;
+            min-width: 55px;
         }
         .col-usage {
-            min-width: 65px;
+            min-width: 55px;
         }
         .col-loss {
-            min-width: 55px;
+            min-width: 50px;
         }
         .col-shrink {
-            min-width: 55px;
+            min-width: 50px;
         }
         .col-actual {
-            min-width: 65px;
+            min-width: 60px;
             font-weight: 600;
             color: #1a2a4a;
         }
         .col-total {
-            min-width: 70px;
+            min-width: 65px;
             font-weight: 600;
             color: #1a2a4a;
         }
         .col-action {
-            min-width: 70px;
+            min-width: 65px;
             text-align: center;
         }
         .empty-row td {
-            padding: 16px 14px;
+            padding: 14px;
             text-align: center;
             color: #8a9aa8;
             font-style: italic;
             background: #fafcff !important;
         }
+
+        .cost-summary {
+            text-align: right;
+            font-size: 13px;
+            color: #3d5a78;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        .cost-summary strong {
+            color: #1a2a4a;
+        }
+
+        /* ===== 报价结果看板 ===== */
         .result-section {
-            grid-column: 1 / -1;
-            margin-top: 20px;
-            border-radius: 20px;
-            padding: 18px 24px;
+            margin-top: 18px;
+            border-radius: 16px;
+            padding: 14px 20px;
             border: 1px solid #dce8f5;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px 14px;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 8px 14px;
             background: linear-gradient(145deg, #f0f5fe, #e8eefa);
         }
         .result-item {
             display: flex;
             flex-direction: column;
-            padding: 6px 8px;
-            border-radius: 10px;
+            padding: 4px 6px;
+            border-radius: 8px;
             background: rgba(255, 255, 255, 0.5);
-            transition: background 0.2s;
-            min-height: 48px;
+            min-height: 40px;
             justify-content: center;
-        }
-        .result-item:hover {
-            background: rgba(255, 255, 255, 0.9);
         }
         .result-item .label {
             font-size: 10px;
             font-weight: 700;
             color: #4f6b86;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.3px;
             text-transform: uppercase;
-            margin-bottom: 1px;
         }
         .result-item .value-unit {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #0a1e30;
-            letter-spacing: -0.2px;
             line-height: 1.2;
         }
-        .result-item .value-unit .currency {
-            font-size: 13px;
-            font-weight: 600;
-            color: #5d7a97;
-            margin-right: 1px;
-        }
         .result-item .value-unit .per-piece {
-            font-size: 12px;
+            font-size: 11px;
             color: #6f859b;
             font-weight: 400;
             margin-left: 2px;
@@ -501,7 +440,7 @@
             border-left: 3px solid #c9a84c;
         }
         .result-item.highlight-item .value-unit {
-            font-size: 24px;
+            font-size: 22px;
             background: linear-gradient(135deg, #1a2a4a, #2c5f8a);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -513,21 +452,22 @@
         @media (max-width: 600px) {
             .result-section {
                 grid-template-columns: 1fr 1fr;
-                gap: 6px 10px;
-                padding: 12px 14px;
+                gap: 4px 10px;
+                padding: 10px 12px;
             }
             .result-item .value-unit {
-                font-size: 16px;
+                font-size: 15px;
             }
             .result-item.highlight-item .value-unit {
-                font-size: 18px;
+                font-size: 17px;
             }
         }
+
+        /* ===== 款式管理 ===== */
         .quote-management {
-            grid-column: 1 / -1;
-            margin-top: 24px;
+            margin-top: 20px;
             border-top: 2px solid #e2e9f2;
-            padding-top: 20px;
+            padding-top: 18px;
         }
         .quote-management .header-row {
             display: flex;
@@ -535,15 +475,15 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
         .quote-management .header-row h3 {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: #1a2a4a;
         }
         .quote-management .header-row h3 span {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 400;
             color: #6f859b;
         }
@@ -552,16 +492,17 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
         .filter-row {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
             align-items: center;
             background: #f5f8fc;
-            padding: 8px 14px;
-            border-radius: 12px;
+            padding: 6px 14px;
+            border-radius: 10px;
             border: 1px solid #e6edf6;
+            margin-bottom: 10px;
         }
         .filter-row .filter-group {
             display: flex;
@@ -582,7 +523,6 @@
             background: #ffffff;
             outline: none;
             font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            transition: border 0.2s;
         }
         .filter-row .filter-group input:focus,
         .filter-row .filter-group select:focus {
@@ -597,24 +537,22 @@
             color: #6f859b;
             margin-left: 4px;
         }
+
         .quote-list-table {
-            width: 100%;
             font-size: 12px;
-            min-width: 750px;
+            min-width: 700px;
         }
         .quote-list-table th {
             background: #f0f5fb;
             color: #1a2a4a;
             font-weight: 700;
             font-size: 10px;
-            letter-spacing: 0.3px;
             text-transform: uppercase;
-            padding: 8px 10px;
-            text-align: left;
+            padding: 7px 10px;
             border-bottom: 1.5px solid #dce3ec;
         }
         .quote-list-table td {
-            padding: 8px 10px;
+            padding: 6px 10px;
             border-bottom: 1px solid #eef2f8;
             vertical-align: middle;
             background: #ffffff;
@@ -624,398 +562,69 @@
         }
         .quote-list-table .col-actions {
             text-align: center;
-            min-width: 90px;
+            min-width: 80px;
         }
         .quote-list-table .col-checkbox {
-            width: 34px;
+            width: 32px;
             text-align: center;
         }
         .quote-list-table .col-checkbox input[type="checkbox"] {
-            width: 15px;
-            height: 15px;
+            width: 14px;
+            height: 14px;
             cursor: pointer;
             accent-color: #1a2a4a;
-            transition: transform 0.15s;
-        }
-        .quote-list-table .col-checkbox input[type="checkbox"]:hover {
-            transform: scale(1.1);
-        }
-        .quote-list-table .col-customer {
-            min-width: 70px;
-        }
-        .quote-list-table .col-style {
-            min-width: 70px;
         }
         .export-info {
             font-size: 12px;
             color: #4a6a8b;
             background: #eef4fa;
-            padding: 3px 14px;
+            padding: 2px 14px;
             border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
             border: 1px solid #dce6f0;
         }
+
         .library-tools {
-            grid-column: 1 / -1;
-            margin-top: 10px;
+            margin-top: 12px;
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
             border-top: 1px solid #e2e9f2;
-            padding-top: 16px;
+            padding-top: 14px;
         }
         .library-tools .btn {
-            padding: 6px 22px;
+            padding: 5px 20px;
             font-size: 13px;
         }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(26, 42, 74, 0.4);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            animation: fadeIn 0.2s ease;
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        .modal-box {
-            background: #ffffff;
-            border-radius: 24px;
-            max-width: 1150px;
-            width: 100%;
-            max-height: 85vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 30px 80px rgba(26, 42, 74, 0.2);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        .modal-box.maximized {
-            max-width: 98vw;
-            max-height: 95vh;
-            width: 98vw;
-            height: 95vh;
-            border-radius: 14px;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 24px;
-            border-bottom: 2px solid #eef2f7;
-            background: #fafcff;
-            flex-shrink: 0;
-        }
-        .modal-header h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a2a4a;
-        }
-        .modal-header .header-actions {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
-        .modal-header .btn-maximize {
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: #6f859b;
-            padding: 0 4px;
-            line-height: 1;
-            transition: color 0.2s, transform 0.2s;
-        }
-        .modal-header .btn-maximize:hover {
-            color: #1a2a4a;
-        }
-        .modal-header .btn-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #8a9aa8;
-            padding: 0 6px;
-            line-height: 1;
-            transition: color 0.2s, transform 0.2s;
-        }
-        .modal-header .btn-close:hover {
-            color: #1a2a4a;
-            transform: rotate(90deg);
-        }
-        .modal-body {
-            padding: 18px 22px;
-            overflow-y: auto;
-            flex: 1;
-            background: #fafcff;
-        }
-        .modal-body .form-row {
-            margin-bottom: 10px;
-        }
-        .modal-body .form-group {
-            flex: 1;
-            min-width: 90px;
-        }
-        .modal-body .form-group input,
-        .modal-body .form-group select {
-            padding: 6px 10px;
-            font-size: 13px;
-            border-radius: 8px;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-        }
-        .modal-body .lib-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-        .modal-body .lib-table th {
-            background: #f0f5fb;
-            color: #1a2a4a;
-            font-weight: 700;
-            font-size: 10px;
-            padding: 8px 10px;
-            text-align: left;
-            border-bottom: 1.5px solid #dce3ec;
-        }
-        .modal-body .lib-table td {
-            padding: 6px 10px;
-            border-bottom: 1px solid #eef2f8;
-            vertical-align: middle;
-        }
-        .modal-body .lib-table .btn-sm {
-            padding: 3px 8px;
-            font-size: 11px;
-        }
-        .modal-footer {
-            padding: 14px 24px;
-            border-top: 1px solid #eef2f7;
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            flex-wrap: wrap;
-            background: #fafcff;
-            flex-shrink: 0;
-        }
-        .filter-collapsible {
-            overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.2s ease;
-            max-height: 600px;
-            opacity: 1;
-        }
-        .filter-collapsible.collapsed {
-            max-height: 0;
-            opacity: 0;
-            padding-top: 0;
-            margin-bottom: 0;
-        }
-        .filter-collapsible .search-bar,
-        .filter-collapsible .extra-filters,
-        .filter-collapsible .selection-toolbar,
-        .filter-collapsible .export-filter-bar {
-            margin-bottom: 10px;
-        }
-        .toggle-filter-btn {
-            background: none;
-            border: none;
-            font-size: 12px;
-            color: #2c5f8a;
-            cursor: pointer;
-            padding: 3px 12px;
-            border-radius: 20px;
-            background: #eef4fa;
-            transition: background 0.2s;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .toggle-filter-btn:hover {
-            background: #dce6f0;
-        }
-        .search-bar {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .search-bar label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2c3f5a;
-        }
-        .search-bar input {
-            flex: 1;
-            min-width: 150px;
-            padding: 5px 10px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 6px;
-            font-size: 12px;
-            background: #ffffff;
-            outline: none;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            transition: border 0.2s;
-        }
-        .search-bar input:focus {
-            border-color: #2c5f8a;
-        }
-        .search-bar .btn {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        .export-filter-bar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 6px 12px;
-            background: #f5f8fc;
-            border-radius: 8px;
-            border: 1px solid #e6edf6;
-        }
-        .export-filter-bar label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2c3f5a;
-        }
-        .export-filter-bar select {
-            padding: 4px 10px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 6px;
-            font-size: 12px;
-            background: #ffffff;
-            outline: none;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            min-width: 120px;
-        }
-        .export-filter-bar select:focus {
-            border-color: #2c5f8a;
-        }
-        .export-filter-bar .btn {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        .export-filter-bar .filter-info {
-            font-size: 11px;
-            color: #6f859b;
-            margin-left: 4px;
-        }
-        .extra-filters {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 6px 12px;
-            background: #f5f8fc;
-            border-radius: 8px;
-            border: 1px solid #e6edf6;
-        }
-        .extra-filters label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #2c3f5a;
-        }
-        .extra-filters select {
-            padding: 4px 10px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 6px;
-            font-size: 12px;
-            background: #ffffff;
-            outline: none;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            min-width: 90px;
-        }
-        .extra-filters select:focus {
-            border-color: #2c5f8a;
-        }
-        .extra-filters input {
-            padding: 4px 10px;
-            border: 1.5px solid #dce3ec;
-            border-radius: 6px;
-            font-size: 12px;
-            background: #ffffff;
-            outline: none;
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-            min-width: 100px;
-        }
-        .extra-filters input:focus {
-            border-color: #2c5f8a;
-        }
-        .extra-filters .btn {
-            padding: 4px 12px;
-            font-size: 12px;
-        }
-        .selection-toolbar {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            padding: 4px 12px;
-            background: #f5f8fc;
-            border-radius: 8px;
-            border: 1px solid #e6edf6;
-        }
-        .selection-toolbar .selection-info {
-            font-size: 12px;
-            color: #2c3f5a;
-            font-weight: 600;
-            margin-right: auto;
-        }
-        .selection-toolbar .btn {
-            padding: 3px 12px;
-            font-size: 11px;
-        }
-        .actions {
-            grid-column: 1 / -1;
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-            margin-top: 14px;
-            flex-wrap: wrap;
-        }
-        .actions .btn {
-            padding: 8px 24px;
-            font-size: 13px;
-        }
+
         .storage-note {
-            grid-column: 1 / -1;
             text-align: center;
             font-size: 12px;
             color: #6f859b;
-            margin-top: 6px;
             padding: 4px 16px;
             background: #f0f5fb;
             border-radius: 40px;
-            display: inline-block;
-            width: auto;
-            justify-self: center;
             border: 1px solid #e6edf6;
+            display: inline-block;
         }
+
+        .actions-bar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        .actions-bar .btn {
+            padding: 6px 20px;
+            font-size: 13px;
+        }
+
+        /* ===== 登录 ===== */
         .login-container {
             max-width: 400px;
             margin: 60px auto;
-            padding: 36px 32px;
+            padding: 32px 28px;
             background: #ffffff;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(26, 42, 74, 0.10);
@@ -1025,16 +634,15 @@
             font-size: 22px;
             font-weight: 700;
             color: #1a2a4a;
-            margin-bottom: 6px;
         }
         .login-container .subtitle {
             font-size: 13px;
             color: #6f859b;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
         .login-container .form-group {
             text-align: left;
-            margin-bottom: 14px;
+            margin-bottom: 12px;
         }
         .login-container .form-group label {
             font-size: 12px;
@@ -1050,7 +658,6 @@
             border-radius: 8px;
             font-size: 14px;
             outline: none;
-            transition: border 0.2s;
         }
         .login-container .form-group input:focus {
             border-color: #2c5f8a;
@@ -1060,10 +667,10 @@
             padding: 10px;
             font-size: 15px;
             border-radius: 8px;
-            margin-top: 6px;
+            margin-top: 4px;
         }
         .login-container .switch-link {
-            margin-top: 14px;
+            margin-top: 12px;
             font-size: 13px;
             color: #6f859b;
         }
@@ -1079,24 +686,22 @@
         .login-container .error-msg {
             color: #e74c3c;
             font-size: 12px;
-            margin-top: 6px;
             min-height: 18px;
         }
         .login-container .success-msg {
             color: #27ae60;
             font-size: 12px;
-            margin-top: 6px;
             min-height: 18px;
         }
         .login-container .logo-icon {
-            font-size: 40px;
-            margin-bottom: 8px;
+            font-size: 38px;
+            margin-bottom: 6px;
         }
         .login-container .config-section {
             background: #f5f8fc;
             border-radius: 10px;
-            padding: 14px;
-            margin-bottom: 18px;
+            padding: 12px;
+            margin-bottom: 16px;
             border: 1px solid #e6edf6;
             text-align: left;
         }
@@ -1109,12 +714,12 @@
         }
         .login-container .config-section input {
             width: 100%;
-            padding: 6px 10px;
+            padding: 5px 10px;
             border: 1.5px solid #dce3ec;
             border-radius: 6px;
             font-size: 12px;
             outline: none;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             background: #fafcff;
         }
         .login-container .config-section input:focus {
@@ -1124,10 +729,209 @@
             font-size: 11px;
             color: #8a9aa8;
         }
+
+        /* ===== 模态框 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 42, 74, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-box {
+            background: #ffffff;
+            border-radius: 20px;
+            max-width: 1100px;
+            width: 100%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 30px 80px rgba(26, 42, 74, 0.2);
+            overflow: hidden;
+        }
+        .modal-box.maximized {
+            max-width: 98vw;
+            max-height: 95vh;
+            width: 98vw;
+            height: 95vh;
+            border-radius: 12px;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 22px;
+            border-bottom: 2px solid #eef2f7;
+            background: #fafcff;
+            flex-shrink: 0;
+        }
+        .modal-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a2a4a;
+        }
+        .modal-header .header-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .modal-header .btn-maximize {
+            background: none;
+            border: none;
+            font-size: 17px;
+            cursor: pointer;
+            color: #6f859b;
+        }
+        .modal-header .btn-maximize:hover {
+            color: #1a2a4a;
+        }
+        .modal-header .btn-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #8a9aa8;
+            padding: 0 4px;
+        }
+        .modal-header .btn-close:hover {
+            color: #1a2a4a;
+            transform: rotate(90deg);
+        }
+        .modal-body {
+            padding: 16px 20px;
+            overflow-y: auto;
+            flex: 1;
+            background: #fafcff;
+        }
+        .modal-body .form-group {
+            margin-bottom: 6px;
+        }
+        .modal-body .form-group input,
+        .modal-body .form-group select {
+            padding: 5px 10px;
+            font-size: 13px;
+            border-radius: 8px;
+            border: 1.5px solid #dce3ec;
+            outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+            width: 100%;
+            background: #fff;
+        }
+        .modal-body .form-group input:focus,
+        .modal-body .form-group select:focus {
+            border-color: #2c5f8a;
+        }
+        .modal-body .lib-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .modal-body .lib-table th {
+            background: #f0f5fb;
+            color: #1a2a4a;
+            font-weight: 700;
+            font-size: 10px;
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1.5px solid #dce3ec;
+        }
+        .modal-body .lib-table td {
+            padding: 5px 10px;
+            border-bottom: 1px solid #eef2f8;
+            vertical-align: middle;
+        }
+        .modal-footer {
+            padding: 12px 22px;
+            border-top: 1px solid #eef2f7;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: #fafcff;
+            flex-shrink: 0;
+        }
+
+        .filter-collapsible {
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            max-height: 500px;
+        }
+        .filter-collapsible.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .search-bar,
+        .extra-filters,
+        .selection-toolbar,
+        .export-filter-bar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .search-bar label,
+        .extra-filters label,
+        .export-filter-bar label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3f5a;
+        }
+        .search-bar input,
+        .extra-filters input,
+        .extra-filters select,
+        .export-filter-bar select {
+            padding: 4px 10px;
+            border: 1.5px solid #dce3ec;
+            border-radius: 6px;
+            font-size: 12px;
+            background: #ffffff;
+            outline: none;
+            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
+        }
+        .search-bar input:focus,
+        .extra-filters input:focus,
+        .extra-filters select:focus,
+        .export-filter-bar select:focus {
+            border-color: #2c5f8a;
+        }
+        .selection-toolbar .selection-info {
+            font-size: 12px;
+            color: #2c3f5a;
+            font-weight: 600;
+            margin-right: auto;
+        }
+        .toggle-filter-btn {
+            background: none;
+            border: none;
+            font-size: 12px;
+            color: #2c5f8a;
+            cursor: pointer;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: #eef4fa;
+            font-weight: 600;
+        }
+        .toggle-filter-btn:hover {
+            background: #dce6f0;
+        }
+
+        /* ===== 打印 ===== */
         @media print {
             body {
                 background: #fff;
-                padding: 0.3in;
+                padding: 0.2in;
             }
             .container {
                 box-shadow: none;
@@ -1135,9 +939,10 @@
                 border-radius: 0;
             }
             .btn,
-            .actions .btn,
+            .actions-bar .btn,
             .filter-row .btn,
-            .library-tools .btn {
+            .library-tools .btn,
+            .quote-management .header-row .actions .btn {
                 display: none !important;
             }
             .table-wrap {
@@ -1145,15 +950,6 @@
             }
             .result-section {
                 border-color: #ccc;
-            }
-            .section-header .btn {
-                display: none !important;
-            }
-            .quote-management .header-row .actions .btn {
-                display: none !important;
-            }
-            .storage-note {
-                display: none !important;
             }
             .filter-row {
                 display: none !important;
@@ -1164,30 +960,30 @@
             .modal-overlay {
                 display: none !important;
             }
+            .storage-note {
+                display: none !important;
+            }
             .header::after {
                 display: none;
             }
         }
         ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
+            width: 4px;
+            height: 4px;
         }
         ::-webkit-scrollbar-track {
             background: #eef2f7;
-            border-radius: 10px;
+            border-radius: 8px;
         }
         ::-webkit-scrollbar-thumb {
             background: #c0cedc;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a0b4cc;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ========== 登录容器 ========== -->
+    <!-- ===== 登录容器 ===== -->
     <div id="loginContainer" class="login-container" style="display:none;">
         <div class="logo-icon">🧥</div>
         <h2>MSA 服装报价系统</h2>
@@ -1216,12 +1012,14 @@
         </div>
     </div>
 
-    <!-- ========== 主应用容器 ========== -->
+    <!-- ===== 主应用容器 ===== -->
     <div id="appContainer" class="container" style="display:none;">
+
+        <!-- 头部 -->
         <div class="header">
             <h1>🧥 MSA服装报价系统 <span>单件核价</span></h1>
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                <span class="badge"><span class="dot"></span> 倒扣利润 · 单件核算</span>
+                <span class="badge">倒扣利润 · 单件核算</span>
                 <div class="user-info">
                     <span class="email" id="userEmailDisplay">user@example.com</span>
                     <button class="btn btn-sm btn-outline" id="logoutBtn">退出</button>
@@ -1229,137 +1027,137 @@
             </div>
         </div>
 
-        <div class="grid-2">
-            <!-- 款式信息 -->
-            <div class="section-block module-bg-light">
-                <div class="section-header"><h3><span class="icon">📋</span> 款式信息</h3></div>
-                <div class="form-row">
-                    <div class="form-group"><label>款式名称</label><input type="text" id="styleName" placeholder="例：男士休闲衬衫" value="经典棉质衬衫" /></div>
-                    <div class="form-group"><label>客户代码</label><input type="text" id="customerCode" placeholder="例：C001" value="C001" /></div>
-                    <div class="form-group"><label>款号</label><input type="text" id="styleNumber" placeholder="例：STYLE-2024" value="STYLE-001" /></div>
+        <!-- ================================================================
+             卡片式参数区 — 类似图片风格
+             ================================================================ -->
+        <div class="param-grid">
+
+            <!-- 卡片：款式与订单 -->
+            <div class="card">
+                <div class="card-title"><span class="icon">📋</span> 款式与订单</div>
+                <div class="field-row">
+                    <div class="field-item wide"><label>客户名称</label><input type="text" id="customerCode" value="欧美客商" style="width:150px;" /></div>
+                    <div class="field-item wide"><label>大货款号</label><input type="text" id="styleNumber" value="TS-2026-01" style="width:150px;" /></div>
+                    <div class="field-item wide"><label>款式名称</label><input type="text" id="styleName" value="工装风连帽夹克" style="width:160px;" /></div>
+                    <div class="field-item"><label>订单数量(件)</label><input type="text" id="orderQty" value="2000" style="width:80px;" /></div>
+                    <div class="field-item"><label>汇率(USD)</label><input type="text" id="exchangeRate" value="7.2350" style="width:90px;" /></div>
                 </div>
             </div>
-            <!-- 固定费用 -->
-            <div class="section-block module-bg-warm">
-                <div class="section-header"><h3><span class="icon">📦</span> 固定费用</h3><span class="sub">单件摊销金额</span></div>
-                <div class="form-row">
-                    <div class="form-group"><label>单件固定费用 <span class="unit">(元/件)</span></label><input type="text" id="fixedCostPerUnit" placeholder="0.00" value="10.00" /></div>
+
+            <!-- 卡片：成本与利润 -->
+            <div class="card">
+                <div class="card-title"><span class="icon">⚙️</span> 成本与利润参数</div>
+                <div class="field-row">
+                    <div class="field-item"><label>基础工价(元)</label><input type="text" id="laborCost" value="35" style="width:80px;" /></div>
+                    <div class="field-item"><label>工价放码系数</label><input type="text" id="laborFactor" value="1.15" style="width:80px;" /></div>
+                    <div class="field-item"><label>大货分摊费(元)</label><input type="text" id="fixedCostPerUnit" value="1500" style="width:100px;" /><span class="unit">/件</span></div>
+                    <div class="field-item"><label>目标利润率(%)</label><input type="text" id="profitRate" value="18" style="width:70px;" /></div>
+                    <div class="field-item"><label>增值税率(%)</label><input type="text" id="taxRate" value="13" style="width:70px;" /></div>
                 </div>
             </div>
-            <!-- 面料明细 -->
-            <div class="section-block module-bg-light">
-                <div class="section-header">
-                    <div><h3><span class="icon">🧶</span> 面料明细</h3><span class="sub">梭织（含缩水率） / 针织（门幅+克重，自动+5cm）</span></div>
-                    <button class="btn btn-primary" id="addFabricBtn">＋ 添加</button>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="col-code">代号</th>
-                                <th class="col-supplier">供应商</th>
-                                <th class="col-name">名称</th>
-                                <th class="col-type">类型</th>
-                                <th class="col-width">门幅 (m)</th>
-                                <th class="col-weight">克重</th>
-                                <th class="col-price">单价</th>
-                                <th class="col-usage">用料 (m)</th>
-                                <th class="col-loss">损耗%</th>
-                                <th class="col-shrink">缩水%</th>
-                                <th class="col-actual">实际用料</th>
-                                <th class="col-total">单件成本</th>
-                                <th class="col-action">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="fabricTableBody"></tbody>
-                    </table>
-                </div>
-                <div style="text-align:right; font-size:13px; color:#3d5a78; margin-top:4px; font-weight:600;">面料单件成本合计：<strong id="fabricTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
-            </div>
-            <!-- 辅料明细 -->
-            <div class="section-block module-bg-light">
-                <div class="section-header">
-                    <div><h3><span class="icon">🧵</span> 辅料明细</h3><span class="sub">纽扣、拉链、衬布、线等</span></div>
-                    <button class="btn btn-primary" id="addAccessoryBtn">＋ 添加</button>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th class="col-code">代号</th><th class="col-supplier">供应商</th><th class="col-name">名称</th><th class="col-price">单价 (元)</th><th class="col-qty">用量</th><th class="col-total">小计</th><th class="col-action">操作</th></tr></thead>
-                        <tbody id="accessoryTableBody"></tbody>
-                    </table>
-                </div>
-                <div style="text-align:right; font-size:13px; color:#3d5a78; margin-top:4px; font-weight:600;">辅料单件成本合计：<strong id="accessoryTotalDisplay" style="color:#1a2a4a;">¥0.00</strong></div>
-            </div>
-            <!-- 工价与利润参数 -->
-            <div class="section-block module-bg-mid">
-                <div class="section-header"><h3><span class="icon">⚙️</span> 工价与利润参数</h3></div>
-                <div class="form-row">
-                    <div class="form-group"><label>工价 <span class="unit">(元/件)</span></label><input type="text" id="laborCost" placeholder="35.00" value="38.00" /></div>
-                    <div class="form-group"><label>管理系数</label><input type="text" id="laborFactor" placeholder="1.30" value="1.30" /></div>
-                    <div class="form-group"><label>利润率 <span class="unit">(%)</span></label><input type="text" id="profitRate" placeholder="20" value="25" /></div>
-                    <div class="form-group"><label>税率 <span class="unit">(%)</span></label><input type="text" id="taxRate" placeholder="13" value="13" /></div>
-                    <div class="form-group"><label>汇率 <span class="unit">(USD/CNY)</span></label><input type="text" id="exchangeRate" placeholder="7.20" value="7.20" /></div>
-                </div>
-            </div>
-            <!-- 报价结果看板 -->
-            <div class="result-section">
-                <div class="result-item"><span class="label">🧶 面料</span><span class="value-unit" id="fabricCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">🧵 辅料</span><span class="value-unit" id="accessoryCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">⚙️ 工价</span><span class="value-unit" id="laborDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">📦 固定费</span><span class="value-unit" id="fixedCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">📊 总成本</span><span class="value-unit" id="totalCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">📈 利润</span><span class="value-unit" id="profitDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">💰 不含税</span><span class="value-unit" id="priceExTaxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item"><span class="label">🧾 税额</span><span class="value-unit" id="taxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item highlight-item"><span class="label">🏷️ 含税报价</span><span class="value-unit" id="priceIncTaxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
-                <div class="result-item usd-item"><span class="label">💵 美金报价</span><span class="value-unit" id="usdPriceDisplay">$0.00 <span class="per-piece">/件</span></span></div>
-            </div>
-            <!-- 款式管理 -->
-            <div class="quote-management">
-                <div class="header-row">
-                    <h3>📋 已保存款式 <span>（云端存储 · 实时同步）</span></h3>
-                    <div class="actions">
-                        <button class="btn btn-success" id="saveQuoteBtn">💾 保存</button>
-                        <button class="btn btn-primary" id="exportSelectedBtn">📊 导出选中</button>
-                        <button class="btn btn-outline" id="clearQuotesBtn">🗑️ 清空</button>
-                    </div>
-                </div>
-                <div class="filter-row">
-                    <div class="filter-group"><label>客户：</label><select id="filterCustomer"><option value="">全部</option></select></div>
-                    <div class="filter-group"><label>款号：</label><input type="text" id="filterStyleNumber" placeholder="搜索款号..." /></div>
-                    <div class="filter-group"><label>款式：</label><input type="text" id="filterStyleName" placeholder="搜索名称..." /></div>
-                    <button class="btn btn-sm btn-outline" id="applyFilterBtn">🔍 筛选</button>
-                    <button class="btn btn-sm btn-outline" id="clearFilterBtn">清除</button>
-                    <span id="filterResultCount"></span>
-                </div>
-                <div class="table-wrap">
-                    <table class="quote-list-table">
-                        <thead><tr><th class="col-checkbox"><input type="checkbox" id="selectAllCheckbox" /></th><th style="width:40px;">#</th><th class="col-customer">客户</th><th class="col-style">款号</th><th>款式名称</th><th>单件成本</th><th>含税报价</th><th>美金价</th><th style="width:90px;">操作</th></tr></thead>
-                        <tbody id="quoteListBody"><tr class="empty-row"><td colspan="9">暂无保存款式，编辑后点击"保存"</td></tr></tbody>
-                    </table>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; flex-wrap:wrap; gap:6px;">
-                    <span class="export-info" id="selectedCountInfo">✅ 已选中 0 个款式</span>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button class="btn btn-sm btn-outline" id="selectAllBtn">全选可见</button>
-                        <button class="btn btn-sm btn-outline" id="deselectAllBtn">取消全选</button>
-                    </div>
-                </div>
-            </div>
-            <!-- 库管理工具 -->
-            <div class="library-tools">
-                <button class="btn btn-info" id="manageFabricLibBtn">📚 面料库</button>
-                <button class="btn btn-info" id="manageAccessoryLibBtn">📚 辅料库</button>
-            </div>
-            <div style="grid-column:1/-1; display:flex; justify-content:center;"><span class="storage-note">☁️ 云端存储 · 多人协作 · 自动同步</span></div>
-            <div class="actions">
-                <button class="btn" id="resetBtn">↻ 重置示例</button>
-                <button class="btn" id="saveJsonBtn">💾 导出JSON</button>
-                <button class="btn" id="loadJsonBtn">📂 导入JSON</button>
-                <button class="btn btn-primary" id="printBtn">🖨️ 打印</button>
-            </div>
-            <input type="file" id="fileInput" accept=".json" style="display:none;" />
+
         </div>
+
+        <!-- ================================================================
+             面料 / 辅料 表格
+             ================================================================ -->
+        <div class="section-block">
+            <div class="section-header">
+                <div><h3><span class="icon">🧶</span> 面料明细</h3><span class="sub">梭织（含缩水率） / 针织（门幅+克重，自动+5cm）</span></div>
+                <button class="btn btn-primary" id="addFabricBtn">＋ 添加</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th class="col-code">代号</th><th class="col-supplier">供应商</th><th class="col-name">名称</th><th class="col-type">类型</th><th class="col-width">门幅(m)</th><th class="col-weight">克重</th><th class="col-price">单价</th><th class="col-usage">用料(m)</th><th class="col-loss">损耗%</th><th class="col-shrink">缩水%</th><th class="col-actual">实际用料</th><th class="col-total">单件成本</th><th class="col-action">操作</th></tr></thead>
+                    <tbody id="fabricTableBody"></tbody>
+                </table>
+            </div>
+            <div class="cost-summary">面料单件成本合计：<strong id="fabricTotalDisplay">¥0.00</strong></div>
+        </div>
+
+        <div class="section-block" style="margin-top:16px;">
+            <div class="section-header">
+                <div><h3><span class="icon">🧵</span> 辅料明细</h3><span class="sub">纽扣、拉链、衬布、线等</span></div>
+                <button class="btn btn-primary" id="addAccessoryBtn">＋ 添加</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th class="col-code">代号</th><th class="col-supplier">供应商</th><th class="col-name">名称</th><th class="col-price">单价 (元)</th><th class="col-usage">用量</th><th class="col-total">小计</th><th class="col-action">操作</th></tr></thead>
+                    <tbody id="accessoryTableBody"></tbody>
+                </table>
+            </div>
+            <div class="cost-summary">辅料单件成本合计：<strong id="accessoryTotalDisplay">¥0.00</strong></div>
+        </div>
+
+        <!-- ================================================================
+             报价结果看板
+             ================================================================ -->
+        <div class="result-section">
+            <div class="result-item"><span class="label">🧶 面料</span><span class="value-unit" id="fabricCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">🧵 辅料</span><span class="value-unit" id="accessoryCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">⚙️ 工价</span><span class="value-unit" id="laborDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">📦 分摊费</span><span class="value-unit" id="fixedCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">📊 总成本</span><span class="value-unit" id="totalCostDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">📈 利润</span><span class="value-unit" id="profitDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">💰 不含税</span><span class="value-unit" id="priceExTaxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item"><span class="label">🧾 税额</span><span class="value-unit" id="taxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item highlight-item"><span class="label">🏷️ 含税报价</span><span class="value-unit" id="priceIncTaxDisplay">¥0.00 <span class="per-piece">/件</span></span></div>
+            <div class="result-item usd-item"><span class="label">💵 美金报价</span><span class="value-unit" id="usdPriceDisplay">$0.00 <span class="per-piece">/件</span></span></div>
+        </div>
+
+        <!-- ================================================================
+             款式管理
+             ================================================================ -->
+        <div class="quote-management">
+            <div class="header-row">
+                <h3>📋 已保存款式 <span>（云端存储 · 实时同步）</span></h3>
+                <div class="actions">
+                    <button class="btn btn-success" id="saveQuoteBtn">💾 保存</button>
+                    <button class="btn btn-primary" id="exportSelectedBtn">📊 导出选中</button>
+                    <button class="btn btn-outline" id="clearQuotesBtn">🗑️ 清空</button>
+                </div>
+            </div>
+            <div class="filter-row">
+                <div class="filter-group"><label>客户：</label><select id="filterCustomer"><option value="">全部</option></select></div>
+                <div class="filter-group"><label>款号：</label><input type="text" id="filterStyleNumber" placeholder="搜索款号..." /></div>
+                <div class="filter-group"><label>款式：</label><input type="text" id="filterStyleName" placeholder="搜索名称..." /></div>
+                <button class="btn btn-sm btn-outline" id="applyFilterBtn">🔍 筛选</button>
+                <button class="btn btn-sm btn-outline" id="clearFilterBtn">清除</button>
+                <span id="filterResultCount"></span>
+            </div>
+            <div class="table-wrap">
+                <table class="quote-list-table">
+                    <thead><tr><th class="col-checkbox"><input type="checkbox" id="selectAllCheckbox" /></th><th style="width:32px;">#</th><th class="col-customer">客户</th><th class="col-style">款号</th><th>款式名称</th><th>单件成本</th><th>含税报价</th><th>美金价</th><th style="width:80px;">操作</th></tr></thead>
+                    <tbody id="quoteListBody"><tr class="empty-row"><td colspan="9">暂无保存款式，编辑后点击"保存"</td></tr></tbody>
+                </table>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; flex-wrap:wrap; gap:6px;">
+                <span class="export-info" id="selectedCountInfo">✅ 已选中 0 个款式</span>
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-outline" id="selectAllBtn">全选可见</button>
+                    <button class="btn btn-sm btn-outline" id="deselectAllBtn">取消全选</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 库管理 & 工具 ===== -->
+        <div class="library-tools">
+            <button class="btn btn-info" id="manageFabricLibBtn">📚 面料库</button>
+            <button class="btn btn-info" id="manageAccessoryLibBtn">📚 辅料库</button>
+        </div>
+
+        <div style="display:flex; justify-content:center; margin-top:10px;">
+            <span class="storage-note">☁️ 云端存储 · 多人协作 · 自动同步</span>
+        </div>
+
+        <div class="actions-bar">
+            <button class="btn" id="resetBtn">↻ 重置示例</button>
+            <button class="btn" id="saveJsonBtn">💾 导出JSON</button>
+            <button class="btn" id="loadJsonBtn">📂 导入JSON</button>
+            <button class="btn btn-primary" id="printBtn">🖨️ 打印</button>
+        </div>
+        <input type="file" id="fileInput" accept=".json" style="display:none;" />
+
     </div>
 
     <!-- ===== 模态框：面料库管理 ===== -->
@@ -1386,23 +1184,23 @@
                         <button class="btn btn-sm btn-success" id="exportFilteredFabricBtn">📊 导出选中</button>
                     </div>
                 </div>
-                <div style="text-align:right; margin-bottom:10px;"><button class="toggle-filter-btn" id="fabricToggleFilter">▲ 收起筛选</button></div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-                    <div class="form-group" style="flex:1; min-width:80px;"><label>名称</label><input type="text" id="libFabricName" placeholder="名称" /></div>
-                    <div class="form-group" style="flex:0 0 80px;"><label>代号</label><input type="text" id="libFabricCode" placeholder="代号" /></div>
-                    <div class="form-group" style="flex:0 0 100px;"><label>成分</label><input type="text" id="libFabricComposition" placeholder="80%锦纶 20%氨纶" /></div>
-                    <div class="form-group" style="flex:0 0 80px;"><label>供应商</label><input type="text" id="libFabricSupplier" placeholder="供应商" /></div>
-                    <div class="form-group" style="flex:0 0 80px;"><label>类型</label><select id="libFabricType"><option value="针织">针织</option><option value="梭织">梭织</option></select></div>
-                    <div class="form-group" style="flex:0 0 60px;"><label>门幅</label><input type="text" id="libFabricWidth" placeholder="1.5" /></div>
-                    <div class="form-group" style="flex:0 0 60px;"><label>克重</label><input type="text" id="libFabricWeight" placeholder="200" /></div>
-                    <div class="form-group" style="flex:0 0 70px;"><label>单价</label><input type="text" id="libFabricPrice" placeholder="50" /></div>
-                    <div class="form-group" style="flex:0 0 60px;"><label>损耗%</label><input type="text" id="libFabricLoss" placeholder="5" /></div>
-                    <div class="form-group" style="flex:0 0 70px; justify-content:flex-end;"><button class="btn btn-success" id="addLibFabricBtn">➕ 添加</button></div>
+                <div style="text-align:right; margin-bottom:8px;"><button class="toggle-filter-btn" id="fabricToggleFilter">▲ 收起筛选</button></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div class="form-group" style="flex:1; min-width:70px;"><label>名称</label><input type="text" id="libFabricName" placeholder="名称" /></div>
+                    <div class="form-group" style="flex:0 0 70px;"><label>代号</label><input type="text" id="libFabricCode" placeholder="代号" /></div>
+                    <div class="form-group" style="flex:0 0 90px;"><label>成分</label><input type="text" id="libFabricComposition" placeholder="80%锦纶 20%氨纶" /></div>
+                    <div class="form-group" style="flex:0 0 70px;"><label>供应商</label><input type="text" id="libFabricSupplier" placeholder="供应商" /></div>
+                    <div class="form-group" style="flex:0 0 70px;"><label>类型</label><select id="libFabricType"><option value="针织">针织</option><option value="梭织">梭织</option></select></div>
+                    <div class="form-group" style="flex:0 0 55px;"><label>门幅</label><input type="text" id="libFabricWidth" placeholder="1.5" /></div>
+                    <div class="form-group" style="flex:0 0 55px;"><label>克重</label><input type="text" id="libFabricWeight" placeholder="200" /></div>
+                    <div class="form-group" style="flex:0 0 60px;"><label>单价</label><input type="text" id="libFabricPrice" placeholder="50" /></div>
+                    <div class="form-group" style="flex:0 0 55px;"><label>损耗%</label><input type="text" id="libFabricLoss" placeholder="5" /></div>
+                    <div class="form-group" style="flex:0 0 65px; justify-content:flex-end;"><button class="btn btn-success" id="addLibFabricBtn">➕ 添加</button></div>
                 </div>
                 <div style="margin-bottom:6px;"><div class="form-group" style="flex:1;"><label>描述</label><input type="text" id="libFabricDesc" placeholder="可选" style="width:100%;" /></div></div>
                 <div class="table-wrap">
                     <table class="lib-table">
-                        <thead><tr><th class="col-checkbox">选</th><th>代号</th><th>名称</th><th>成分</th><th>供应商</th><th>类型</th><th>门幅</th><th>克重</th><th>单价</th><th>损耗%</th><th>描述</th><th style="width:110px;">操作</th></tr></thead>
+                        <thead><tr><th class="col-checkbox">选</th><th>代号</th><th>名称</th><th>成分</th><th>供应商</th><th>类型</th><th>门幅</th><th>克重</th><th>单价</th><th>损耗%</th><th>描述</th><th style="width:100px;">操作</th></tr></thead>
                         <tbody id="fabricLibBody"><tr class="empty-row"><td colspan="12">暂无数据</td></tr></tbody>
                     </table>
                 </div>
@@ -1433,17 +1231,17 @@
                         <button class="btn btn-sm btn-success" id="exportFilteredAccessoryBtn">📊 导出选中</button>
                     </div>
                 </div>
-                <div style="text-align:right; margin-bottom:10px;"><button class="toggle-filter-btn" id="accessoryToggleFilter">▲ 收起筛选</button></div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-                    <div class="form-group" style="flex:1; min-width:120px;"><label>名称</label><input type="text" id="libAccName" placeholder="名称" /></div>
-                    <div class="form-group" style="flex:0 0 90px;"><label>代号</label><input type="text" id="libAccCode" placeholder="代号" /></div>
-                    <div class="form-group" style="flex:0 0 90px;"><label>供应商</label><input type="text" id="libAccSupplier" placeholder="供应商" /></div>
-                    <div class="form-group" style="flex:0 0 90px;"><label>单价(元)</label><input type="text" id="libAccPrice" placeholder="单价" /></div>
-                    <div class="form-group" style="flex:0 0 90px; justify-content:flex-end;"><button class="btn btn-success" id="addLibAccBtn">➕ 添加</button></div>
+                <div style="text-align:right; margin-bottom:8px;"><button class="toggle-filter-btn" id="accessoryToggleFilter">▲ 收起筛选</button></div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div class="form-group" style="flex:1; min-width:100px;"><label>名称</label><input type="text" id="libAccName" placeholder="名称" /></div>
+                    <div class="form-group" style="flex:0 0 80px;"><label>代号</label><input type="text" id="libAccCode" placeholder="代号" /></div>
+                    <div class="form-group" style="flex:0 0 80px;"><label>供应商</label><input type="text" id="libAccSupplier" placeholder="供应商" /></div>
+                    <div class="form-group" style="flex:0 0 80px;"><label>单价(元)</label><input type="text" id="libAccPrice" placeholder="单价" /></div>
+                    <div class="form-group" style="flex:0 0 80px; justify-content:flex-end;"><button class="btn btn-success" id="addLibAccBtn">➕ 添加</button></div>
                 </div>
                 <div class="table-wrap">
                     <table class="lib-table">
-                        <thead><tr><th class="col-checkbox">选</th><th>代号</th><th>名称</th><th>供应商</th><th>单价</th><th style="width:110px;">操作</th></tr></thead>
+                        <thead><tr><th class="col-checkbox">选</th><th>代号</th><th>名称</th><th>供应商</th><th>单价</th><th style="width:100px;">操作</th></tr></thead>
                         <tbody id="accessoryLibBody"><tr class="empty-row"><td colspan="6">暂无数据</td></tr></tbody>
                     </table>
                 </div>
@@ -1460,7 +1258,7 @@
             'use strict';
 
             // ============================================================
-            // 1. 配置 Supabase
+            // 1. 配置
             // ============================================================
             const SUPABASE_URL = 'https://cehktltjkiapgnlbctpe.supabase.co';
             const SUPABASE_ANON_KEY =
@@ -1468,7 +1266,6 @@
 
             let supabase = null;
             let currentUser = null;
-
             let fabrics = [];
             let accessories = [];
             let quoteList = [];
@@ -1476,14 +1273,16 @@
             let accessoryLibrary = [];
 
             // ============================================================
-            // 2. 工具函数
+            // 2. 工具
             // ============================================================
             function fmt(v) { return v.toFixed(2); }
+
             function parseInput(val) {
                 if (val === '' || val === null || val === undefined) return 0;
                 const n = parseFloat(val.replace(/,/g, ''));
                 return isNaN(n) ? 0 : n;
             }
+
             function escapeHtml(str) {
                 const div = document.createElement('div');
                 div.textContent = str;
@@ -1491,7 +1290,7 @@
             }
 
             // ============================================================
-            // 3. 计算逻辑 - 单件
+            // 3. 计算
             // ============================================================
             function calcFabric(fabric) {
                 const type = fabric.type || '针织';
@@ -1499,13 +1298,9 @@
                 const lossPct = parseInput(fabric.lossPercent);
                 const price = parseInput(fabric.pricePerKg);
                 let shrinkPct = 0;
-                if (type === '梭织') {
-                    shrinkPct = parseInput(fabric.shrinkPercent) || 0;
-                }
+                if (type === '梭织') shrinkPct = parseInput(fabric.shrinkPercent) || 0;
                 let actualUsage = usage * (1 + lossPct / 100);
-                if (type === '梭织' && shrinkPct > 0) {
-                    actualUsage = actualUsage / (1 - shrinkPct / 100);
-                }
+                if (type === '梭织' && shrinkPct > 0) actualUsage = actualUsage / (1 - shrinkPct / 100);
                 let cost = 0;
                 if (type === '梭织') {
                     cost = actualUsage * price;
@@ -1555,7 +1350,7 @@
             }
 
             // ============================================================
-            // 4. 更新显示
+            // 4. 更新UI
             // ============================================================
             function updateAll() {
                 updateFabricRows();
@@ -1599,7 +1394,7 @@
             }
 
             // ============================================================
-            // 5. 渲染面料 & 辅料
+            // 5. 渲染表格
             // ============================================================
             function renderFabrics() {
                 const tbody = document.getElementById('fabricTableBody');
@@ -1614,8 +1409,8 @@
                     const isWoven = (type === '梭织');
                     html += `
                         <tr data-index="${idx}">
-                            <td><input type="text" class="fabric-code" value="${escapeHtml(f.code || '')}" placeholder="代号" /></td>
-                            <td><input type="text" class="fabric-supplier" value="${escapeHtml(f.supplierCode || '')}" placeholder="供应商" /></td>
+                            <td><input type="text" class="fabric-code" value="${escapeHtml(f.code||'')}" placeholder="代号" /></td>
+                            <td><input type="text" class="fabric-supplier" value="${escapeHtml(f.supplierCode||'')}" placeholder="供应商" /></td>
                             <td><input type="text" class="fabric-name" value="${escapeHtml(f.name)}" placeholder="名称" /></td>
                             <td><select class="fabric-type"><option value="梭织" ${isWoven?'selected':''}>梭织</option><option value="针织" ${!isWoven?'selected':''}>针织</option></select></td>
                             <td><input type="text" class="fabric-width" value="${f.width||''}" placeholder="1.5" ${isWoven?'disabled':''} /></td>
@@ -1838,7 +1633,7 @@
             }
 
             // ============================================================
-            // 6. 绑定主输入事件（修复固定费用不更新）
+            // 6. 绑定输入事件
             // ============================================================
             function bindMainInputs() {
                 const ids = ['laborCost', 'laborFactor', 'profitRate', 'taxRate', 'exchangeRate', 'fixedCostPerUnit'];
@@ -1849,14 +1644,14 @@
                         el.addEventListener('change', updateAll);
                     }
                 });
-                ['styleName', 'customerCode', 'styleNumber'].forEach(id => {
+                ['styleName', 'customerCode', 'styleNumber', 'orderQty'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.addEventListener('input', updateAll);
                 });
             }
 
             // ============================================================
-            // 7. Supabase 认证与数据加载
+            // 7. Supabase 操作
             // ============================================================
             function initSupabase() {
                 const url = document.getElementById('supabaseUrl').value.trim();
@@ -2018,7 +1813,7 @@
             }
 
             // ============================================================
-            // 9. 面料库/辅料库渲染（模态框）
+            // 9. 库渲染（简写，核心功能保留）
             // ============================================================
             function renderFabricLib() {
                 const tbody = document.getElementById('fabricLibBody');
@@ -2258,7 +2053,6 @@
                 updateAll();
             }
 
-            // ★★★ 核心修复：保存时不发送 fixed_cost_per_unit ★★★
             function getCurrentQuoteData() {
                 return {
                     customer_code: document.getElementById('customerCode').value,
@@ -2288,7 +2082,7 @@
             }
 
             // ============================================================
-            // 11. 导出选中（仅汇总表）
+            // 11. 导出选中（汇总表）
             // ============================================================
             function exportSelectedQuotes() {
                 const visibleRows = document.querySelectorAll('#quoteListBody tr:not([style*="display: none"])');
@@ -2307,7 +2101,9 @@
                     ['款式报价汇总（单件核价）'],
                     ['生成日期', new Date().toLocaleString()],
                     [],
-                    ['序号', '客户', '款号', '款式名称', '面料成本', '辅料成本', '工价（含管理）', '固定费用', '总成本', '利润（倒扣）', '不含税价', '税额', '含税报价', '美金价']
+                    ['序号', '客户', '款号', '款式名称', '面料成本', '辅料成本', '工价（含管理）', '分摊费', '总成本', '利润（倒扣）', '不含税价', '税额', '含税报价',
+                        '美金价'
+                    ]
                 ];
                 selectedQuotes.forEach((q, idx) => {
                     const result = computeQuote(q);
@@ -2342,7 +2138,7 @@
             }
 
             // ============================================================
-            // 12. 筛选相关函数
+            // 12. 筛选相关
             // ============================================================
             function applyFabricLibFilters() {
                 const keyword = document.getElementById('fabricLibSearch').value.trim().toLowerCase();
@@ -2428,9 +2224,6 @@
                 document.getElementById('accessorySelectionInfo').textContent = '已选 ' + count + ' 项';
             }
 
-            // ============================================================
-            // 13. 全选/反选（库内）
-            // ============================================================
             function fabricSelectAllVisible() {
                 document.querySelectorAll('#fabricLibBody tr:not(.empty-row)').forEach(row => {
                     if (row.style.display === 'none') return;
@@ -2485,9 +2278,6 @@
                 updateAccessorySelectionInfo();
             }
 
-            // ============================================================
-            // 14. 供应商下拉更新
-            // ============================================================
             function updateFabricSupplierFilter() {
                 const select = document.getElementById('fabricExportSupplier');
                 const suppliers = new Set();
@@ -2520,9 +2310,6 @@
                 applyAccessoryLibFilters();
             }
 
-            // ============================================================
-            // 15. 款式筛选
-            // ============================================================
             function updateFilterDropdown() {
                 const customers = new Set();
                 quoteList.forEach(q => { if (q.customerCode && q.customerCode.trim()) customers.add(q.customerCode
@@ -2612,7 +2399,7 @@
             }
 
             // ============================================================
-            // 16. JSON 备份
+            // 13. JSON 备份
             // ============================================================
             function saveJsonBackup() {
                 const data = {
@@ -2705,31 +2492,33 @@
             }
 
             // ============================================================
-            // 17. 重置示例
+            // 14. 重置示例
             // ============================================================
             function resetToExample() {
-                document.getElementById('customerCode').value = 'C001';
-                document.getElementById('styleNumber').value = 'STYLE-001';
-                document.getElementById('styleName').value = '经典棉质衬衫';
-                document.getElementById('laborCost').value = '38.00';
-                document.getElementById('laborFactor').value = '1.30';
-                document.getElementById('profitRate').value = '25';
+                document.getElementById('customerCode').value = '欧美客商';
+                document.getElementById('styleNumber').value = 'TS-2026-01';
+                document.getElementById('styleName').value = '工装风连帽夹克';
+                document.getElementById('orderQty').value = '2000';
+                document.getElementById('exchangeRate').value = '7.2350';
+                document.getElementById('laborCost').value = '35';
+                document.getElementById('laborFactor').value = '1.15';
+                document.getElementById('profitRate').value = '18';
                 document.getElementById('taxRate').value = '13';
-                document.getElementById('exchangeRate').value = '7.20';
-                document.getElementById('fixedCostPerUnit').value = '10.00';
+                document.getElementById('fixedCostPerUnit').value = '1500';
 
                 fabrics = [
-                    { code: 'F-001', supplierCode: 'SUP-01', name: '棉布', type: '针织', width: '1.5', weight: '200',
-                        pricePerKg: '50', usage: '1.2', lossPercent: '5', shrinkPercent: '' },
-                    { code: 'F-002', supplierCode: 'SUP-01', name: '里布', type: '针织', width: '1.4', weight: '120',
-                        pricePerKg: '35', usage: '0.8', lossPercent: '3', shrinkPercent: '' },
-                    { code: 'F-003', supplierCode: 'SUP-02', name: '梭织衬布', type: '梭织', width: '', weight: '',
-                        pricePerKg: '28', usage: '0.5', lossPercent: '2', shrinkPercent: '3' },
+                    { code: 'F-001', supplierCode: 'SUP-01', name: '涤棉帆布', type: '梭织', width: '', weight: '',
+                        pricePerKg: '28', usage: '1.8', lossPercent: '4', shrinkPercent: '3' },
+                    { code: 'F-002', supplierCode: 'SUP-01', name: '涤纶里布', type: '针织', width: '1.5', weight: '180',
+                        pricePerKg: '22', usage: '1.2', lossPercent: '3', shrinkPercent: '' },
+                    { code: 'F-003', supplierCode: 'SUP-02', name: '罗纹袖口', type: '针织', width: '1.2', weight: '250',
+                        pricePerKg: '35', usage: '0.4', lossPercent: '5', shrinkPercent: '' },
                 ];
                 accessories = [
-                    { code: 'A-001', supplierCode: 'SUP-03', name: '树脂纽扣', price: '1.20', qty: '7' },
-                    { code: 'A-002', supplierCode: 'SUP-03', name: '涤纶缝纫线', price: '0.80', qty: '3' },
-                    { code: 'A-003', supplierCode: 'SUP-04', name: '吊牌+洗标', price: '0.90', qty: '1' },
+                    { code: 'A-001', supplierCode: 'SUP-03', name: '金属拉链', price: '2.50', qty: '1' },
+                    { code: 'A-002', supplierCode: 'SUP-03', name: '树脂纽扣', price: '0.80', qty: '6' },
+                    { code: 'A-003', supplierCode: 'SUP-04', name: '缝纫线', price: '1.20', qty: '2' },
+                    { code: 'A-004', supplierCode: 'SUP-04', name: '吊牌+洗标', price: '0.60', qty: '1' },
                 ];
                 renderFabrics();
                 renderAccessories();
@@ -2737,7 +2526,7 @@
             }
 
             // ============================================================
-            // 18. 模态框控制
+            // 15. 模态框控制
             // ============================================================
             function openModal(modalId) {
                 document.getElementById(modalId).classList.add('active');
@@ -2767,7 +2556,7 @@
             }
 
             // ============================================================
-            // 19. 添加面料/辅料到库
+            // 16. 添加库条目
             // ============================================================
             async function addFabricLib() {
                 const name = document.getElementById('libFabricName').value.trim();
@@ -2823,7 +2612,7 @@
             }
 
             // ============================================================
-            // 20. 导出全部库
+            // 17. 导出库
             // ============================================================
             function exportFabricLibrary() {
                 if (fabricLibrary.length === 0) { alert('面料库为空'); return; }
@@ -2864,7 +2653,7 @@
             }
 
             // ============================================================
-            // 21. 添加面料/辅料到编辑区
+            // 18. 添加面料/辅料
             // ============================================================
             function addFabric(name, type, width, weight, price, usage, lossPct, code, supplier, shrinkPct) {
                 fabrics.push({
@@ -2896,7 +2685,7 @@
             }
 
             // ============================================================
-            // 22. 初始化
+            // 19. 初始化
             // ============================================================
             function init() {
                 // 认证切换
